@@ -68,6 +68,8 @@ export const CONFIG = {
   FUENTES_DISPONIBLES: [
     'Poppins', 'Inter', 'Montserrat', 'Playfair Display', 'Roboto',
     'Lora', 'Nunito', 'Space Grotesk', 'Merriweather', 'Work Sans',
+    'Raleway', 'Oswald', 'Quicksand', 'DM Sans', 'Bebas Neue',
+    'Josefin Sans', 'Caveat', 'Abril Fatface', 'Fira Sans', 'Ubuntu',
   ],
   FUENTE_TITULO_DEFECTO: 'Poppins',
   FUENTE_TEXTO_DEFECTO: 'Inter',

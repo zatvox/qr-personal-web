@@ -8,7 +8,7 @@ import {
   obtenerGaleria, agregarFotoGaleria, eliminarFotoGaleria,
 } from './supabase-data.js';
 import { renderizarQR, descargarQR } from './qr.js';
-import { escapeHtml, comprimirImagen, base64ADataBlob, esHexValido, mezclarConBlanco, iconoRedSocial, cargarGoogleFont, colorTextoLegible } from './utils.js';
+import { escapeHtml, comprimirImagen, base64ADataBlob, esHexValido, mezclarConBlanco, iconoRedSocial, iconoContacto, cargarGoogleFont, colorTextoLegible } from './utils.js';
 import { getSupabaseClient } from './supabase-client.js';
 
 const CAMPOS_TEXTO = ['nombre_completo', 'cargo', 'empresa', 'bio', 'telefono', 'whatsapp', 'direccion', 'horario_atencion', 'video_url'];
@@ -187,17 +187,54 @@ function llenarFormulario(perfil) {
 }
 
 function actualizarPreview(perfil) {
-  document.getElementById('preview-nombre').textContent = perfil.nombre_completo || '';
-  document.getElementById('preview-cargo').textContent = [perfil.cargo, perfil.empresa].filter(Boolean).join(' · ');
-  document.getElementById('preview-bio').textContent = perfil.bio || '';
+  document.getElementById('preview-nombre').textContent = perfil.nombre_completo || 'Edwin García Flores';
+  document.getElementById('preview-cargo').textContent = [perfil.cargo, perfil.empresa].filter(Boolean).join(' · ') || 'Arquitecto · Estudio XYZ';
+
+  const bioEl = document.getElementById('preview-bio');
+  if (perfil.bio) {
+    bioEl.textContent = perfil.bio;
+    bioEl.classList.remove('tarjeta-preview__bio--vacio');
+  } else {
+    bioEl.textContent = 'Soy un profesional apasionado por mi trabajo y siempre busco nuevas oportunidades para crecer y aprender.';
+    bioEl.classList.add('tarjeta-preview__bio--vacio');
+  }
+
   const avatar = document.getElementById('preview-avatar');
-  if (perfil.foto_url) { avatar.src = perfil.foto_url; } else { avatar.removeAttribute('src'); }
+  const placeholder = document.getElementById('preview-avatar-placeholder');
+  if (perfil.foto_url) {
+    avatar.src = perfil.foto_url;
+    if (placeholder) placeholder.style.display = 'none';
+  } else {
+    avatar.removeAttribute('src');
+    if (placeholder) placeholder.style.display = 'flex';
+  }
 
   const redesCont = document.getElementById('preview-redes');
-  redesCont.innerHTML = Object.entries(perfil.redes || {}).map(([key, url]) => {
-    const label = CONFIG.REDES_SOCIALES.find(r => r.key === key)?.label || key;
-    return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" title="${escapeHtml(label)}">${iconoRedSocial(key)}</a>`;
-  }).join('');
+  const redesEntries = Object.entries(perfil.redes || {});
+  if (redesEntries.length) {
+    redesCont.innerHTML = redesEntries.map(([key, url]) => {
+      const label = CONFIG.REDES_SOCIALES.find(r => r.key === key)?.label || key;
+      return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" title="${escapeHtml(label)}">${iconoRedSocial(key)}</a>`;
+    }).join('');
+  } else {
+    redesCont.innerHTML = '<span class="tarjeta-preview__redes-vacio">Tus redes sociales aparecerán aquí</span>';
+  }
+
+  const contactoCont = document.getElementById('preview-contacto');
+  const fila = (icono, label, valor) => `
+    <div class="tarjeta-preview__contacto-item">
+      <span class="tarjeta-preview__contacto-icono">${iconoContacto(icono)}</span>
+      <span class="tarjeta-preview__contacto-texto">
+        <span class="tarjeta-preview__contacto-label">${escapeHtml(label)}</span>
+        <span class="tarjeta-preview__contacto-valor">${escapeHtml(valor)}</span>
+      </span>
+    </div>`;
+  const items = [];
+  if (perfil.telefono) items.push(fila('telefono', 'Teléfono', perfil.telefono));
+  if (perfil.whatsapp && perfil.whatsapp !== perfil.telefono) items.push(fila('whatsapp', 'WhatsApp', perfil.whatsapp));
+  if (perfil.direccion) items.push(fila('direccion', 'Ubicación', perfil.direccion));
+  if (perfil.horario_atencion) items.push(fila('horario', 'Horario', perfil.horario_atencion));
+  contactoCont.innerHTML = items.join('') || '<p class="tarjeta-preview__contacto-vacio">Tus datos de contacto aparecerán aquí.</p>';
 }
 
 function recolectarCambios() {
@@ -226,6 +263,8 @@ document.getElementById('avatar-file').addEventListener('change', (e) => {
   const archivo = e.target.files[0];
   if (!archivo) return;
   document.getElementById('preview-avatar').src = URL.createObjectURL(archivo);
+  const placeholder = document.getElementById('preview-avatar-placeholder');
+  if (placeholder) placeholder.style.display = 'none';
 });
 
 // ------------------------------------------------------------
@@ -355,6 +394,21 @@ async function init() {
     document.getElementById('estado-carga').innerHTML = '<p>No se pudo cargar tu panel. Intenta recargar la página.</p>';
   }
 }
+
+// ------------------------------------------------------------
+// Vista previa en vivo: refleja lo que se va escribiendo en el
+// formulario, no solo lo que ya está guardado (igual que el wizard).
+// ------------------------------------------------------------
+function actualizarPreviewEnVivo() {
+  if (!perfilActual) return;
+  actualizarPreview({ ...perfilActual, ...recolectarCambios() });
+}
+document.getElementById('form-dashboard').addEventListener('input', actualizarPreviewEnVivo);
+document.getElementById('form-dashboard').addEventListener('change', actualizarPreviewEnVivo);
+
+// Íconos de redes/contacto cargados de forma asíncrona (Simple Icons/Lucide,
+// ver utils.js): al terminar de llegar se repinta la preview.
+window.addEventListener('qr-iconos-listos', actualizarPreviewEnVivo);
 
 document.getElementById('form-dashboard').addEventListener('submit', async (e) => {
   e.preventDefault();

@@ -48,8 +48,8 @@ create table if not exists public.profiles (
   updated_at      timestamptz not null default now(),
 
   constraint slug_formato check (slug ~ '^[a-z0-9](-?[a-z0-9])*$' and char_length(slug) between 3 and 40),
-  constraint tema_fuente_titulo_valida check (tema_fuente_titulo in ('Poppins','Inter','Montserrat','Playfair Display','Roboto','Lora','Nunito','Space Grotesk','Merriweather','Work Sans')),
-  constraint tema_fuente_texto_valida check (tema_fuente_texto in ('Poppins','Inter','Montserrat','Playfair Display','Roboto','Lora','Nunito','Space Grotesk','Merriweather','Work Sans')),
+  constraint tema_fuente_titulo_valida check (tema_fuente_titulo in ('Poppins','Inter','Montserrat','Playfair Display','Roboto','Lora','Nunito','Space Grotesk','Merriweather','Work Sans','Raleway','Oswald','Quicksand','DM Sans','Bebas Neue','Josefin Sans','Caveat','Abril Fatface','Fira Sans','Ubuntu')),
+  constraint tema_fuente_texto_valida check (tema_fuente_texto in ('Poppins','Inter','Montserrat','Playfair Display','Roboto','Lora','Nunito','Space Grotesk','Merriweather','Work Sans','Raleway','Oswald','Quicksand','DM Sans','Bebas Neue','Josefin Sans','Caveat','Abril Fatface','Fira Sans','Ubuntu')),
   constraint tema_color_primario_formato check (tema_color_primario ~ '^#[0-9a-fA-F]{6}$'),
   constraint tema_color_secundario_formato check (tema_color_secundario ~ '^#[0-9a-fA-F]{6}$')
 );

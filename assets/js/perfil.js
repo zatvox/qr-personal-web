@@ -4,7 +4,7 @@
 import { CONFIG } from './config.js';
 import { obtenerPerfilPublico, obtenerGaleria } from './supabase-data.js';
 import { descargarVcf } from './vcard.js';
-import { escapeHtml, soloDigitos, esHexValido, colorTextoLegible, mezclarConBlanco, iconoRedSocial, cargarGoogleFont } from './utils.js';
+import { escapeHtml, soloDigitos, esHexValido, colorTextoLegible, mezclarConBlanco, iconoRedSocial, iconoContacto, cargarGoogleFont } from './utils.js';
 
 function obtenerSlugDeUrl() {
   const params = new URLSearchParams(window.location.search);
@@ -49,7 +49,43 @@ function aplicarTema(perfil) {
   root.setProperty('--font-body', `'${fuenteTexto}', sans-serif`);
 }
 
+let _ultimoPerfilRenderizado = null;
+
+/** Pinta redes sociales + lista de contacto (íconos vía Simple Icons/Lucide, ver utils.js) */
+function pintarIconos(perfil) {
+  const redesCont = document.getElementById('p-redes');
+  redesCont.innerHTML = Object.entries(perfil.redes || {}).map(([key, url]) => {
+    const label = CONFIG.REDES_SOCIALES.find(r => r.key === key)?.label || key;
+    return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" title="${escapeHtml(label)}">${iconoRedSocial(key)}</a>`;
+  }).join('');
+
+  // Contacto: fila con ícono + etiqueta + valor (el valor puede ser un link o texto plano)
+  const filaContacto = (icono, label, valorHtml) => `
+    <div class="tarjeta-preview__contacto-item">
+      <span class="tarjeta-preview__contacto-icono">${iconoContacto(icono)}</span>
+      <span class="tarjeta-preview__contacto-texto">
+        <span class="tarjeta-preview__contacto-label">${escapeHtml(label)}</span>
+        ${valorHtml}
+      </span>
+    </div>`;
+  const contactoItems = [];
+  if (perfil.telefono) {
+    contactoItems.push(filaContacto('telefono', 'Teléfono', `<a class="tarjeta-preview__contacto-valor" href="tel:${soloDigitos(perfil.telefono)}">${escapeHtml(perfil.telefono)}</a>`));
+  }
+  if (perfil.mostrar_email && perfil.email_contacto) {
+    contactoItems.push(filaContacto('email', 'E-mail', `<a class="tarjeta-preview__contacto-valor" href="mailto:${escapeHtml(perfil.email_contacto)}">${escapeHtml(perfil.email_contacto)}</a>`));
+  }
+  if (perfil.redes?.web) {
+    contactoItems.push(filaContacto('web', 'Sitio web', `<a class="tarjeta-preview__contacto-valor" href="${escapeHtml(perfil.redes.web)}" target="_blank" rel="noopener">${escapeHtml(perfil.redes.web.replace(/^https?:\/\//, ''))}</a>`));
+  }
+  if (perfil.direccion) {
+    contactoItems.push(filaContacto('direccion', 'Ubicación', `<span class="tarjeta-preview__contacto-valor">${escapeHtml(perfil.direccion)}</span>`));
+  }
+  document.getElementById('p-contacto').innerHTML = contactoItems.join('') || '<p class="form-hint">Sin datos de contacto públicos.</p>';
+}
+
 async function render(perfil) {
+  _ultimoPerfilRenderizado = perfil;
   aplicarTema(perfil);
   document.title = `${perfil.nombre_completo} | QR Personal System`;
   document.getElementById('p-nombre').textContent = perfil.nombre_completo || '';
@@ -62,18 +98,7 @@ async function render(perfil) {
   avatar.onerror = () => { avatar.onerror = null; avatar.src = AVATAR_FALLBACK_SVG; };
   avatar.alt = perfil.nombre_completo || 'Foto de perfil';
 
-  const redesCont = document.getElementById('p-redes');
-  redesCont.innerHTML = Object.entries(perfil.redes || {}).map(([key, url]) => {
-    const label = CONFIG.REDES_SOCIALES.find(r => r.key === key)?.label || key;
-    return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" title="${escapeHtml(label)}">${iconoRedSocial(key)}</a>`;
-  }).join('');
-
-  // Contacto
-  const contactoItems = [];
-  if (perfil.telefono) contactoItems.push(`<div class="tarjeta-preview__contacto-item">📞 <a href="tel:${soloDigitos(perfil.telefono)}">${escapeHtml(perfil.telefono)}</a></div>`);
-  if (perfil.mostrar_email && perfil.email_contacto) contactoItems.push(`<div class="tarjeta-preview__contacto-item">✉️ <a href="mailto:${escapeHtml(perfil.email_contacto)}">${escapeHtml(perfil.email_contacto)}</a></div>`);
-  if (perfil.direccion) contactoItems.push(`<div class="tarjeta-preview__contacto-item">📍 ${escapeHtml(perfil.direccion)}</div>`);
-  document.getElementById('p-contacto').innerHTML = contactoItems.join('') || '<p class="form-hint">Sin datos de contacto públicos.</p>';
+  pintarIconos(perfil);
 
   // WhatsApp
   if (perfil.whatsapp) {
@@ -137,5 +162,11 @@ async function init() {
     document.getElementById('estado-no-encontrado').style.display = 'block';
   }
 }
+
+// Íconos cargados de forma asíncrona (Simple Icons/Lucide, ver utils.js):
+// al terminar de llegar se repintan sobre el perfil ya renderizado.
+window.addEventListener('qr-iconos-listos', () => {
+  if (_ultimoPerfilRenderizado) pintarIconos(_ultimoPerfilRenderizado);
+});
 
 init();

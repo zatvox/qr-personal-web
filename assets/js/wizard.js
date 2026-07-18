@@ -12,7 +12,7 @@ import { verificarSlugDisponible } from './supabase-data.js';
 import {
   slugify, showToast, esEmailValido, escapeHtml,
   leerBorrador, guardarBorrador, limpiarBorrador, debounce,
-  comprimirImagen, blobToBase64, esHexValido, mezclarConBlanco, iconoRedSocial,
+  comprimirImagen, blobToBase64, esHexValido, mezclarConBlanco, iconoRedSocial, iconoContacto,
   cargarGoogleFont, colorTextoLegible,
 } from './utils.js';
 
@@ -172,6 +172,13 @@ checkEsWhatsapp.addEventListener('change', () => { actualizarVisibilidadWhatsapp
 // ------------------------------------------------------------
 // Foto de perfil: input de archivo -> comprimir -> preview + base64
 // ------------------------------------------------------------
+/** Muestra la foto en el círculo de preview y oculta el ícono de silueta */
+function mostrarAvatarPreview(src) {
+  document.getElementById('preview-avatar').src = src;
+  const placeholder = document.getElementById('preview-avatar-placeholder');
+  if (placeholder) placeholder.style.display = 'none';
+}
+
 document.getElementById('foto-file').addEventListener('change', async (e) => {
   const archivo = e.target.files[0];
   if (!archivo) return;
@@ -182,7 +189,7 @@ document.getElementById('foto-file').addEventListener('change', async (e) => {
     avatarPendienteB64 = await blobToBase64(blobMini);
 
     // Preview nítida inmediata (no necesita ser la comprimida pequeña)
-    document.getElementById('preview-avatar').src = URL.createObjectURL(archivo);
+    mostrarAvatarPreview(URL.createObjectURL(archivo));
 
     guardarBorradorActual();
   } catch (err) {
@@ -208,7 +215,7 @@ function cargarBorradorEnForm() {
   });
   if (draft.avatar_pendiente_b64) {
     avatarPendienteB64 = draft.avatar_pendiente_b64;
-    document.getElementById('preview-avatar').src = avatarPendienteB64;
+    mostrarAvatarPreview(avatarPendienteB64);
   }
   if (esHexValido(draft.tema_color_primario)) colorPrimario = draft.tema_color_primario;
   if (esHexValido(draft.tema_color_secundario)) colorSecundario = draft.tema_color_secundario;
@@ -255,24 +262,44 @@ function guardarBorradorActual() {
 function actualizarPreview() {
   const d = recolectarDatos();
 
-  document.getElementById('preview-nombre').textContent = d.nombre_completo || 'Tu nombre aquí';
+  document.getElementById('preview-nombre').textContent = d.nombre_completo || 'Edwin García Flores';
   const cargoEmpresa = [d.cargo, d.empresa].filter(Boolean).join(' · ');
-  document.getElementById('preview-cargo').textContent = cargoEmpresa || 'Tu cargo / empresa';
-  document.getElementById('preview-bio').textContent = d.bio || '';
+  document.getElementById('preview-cargo').textContent = cargoEmpresa || 'Arquitecto · Estudio XYZ';
+  const bioEl = document.getElementById('preview-bio');
+  if (d.bio) {
+    bioEl.textContent = d.bio;
+    bioEl.classList.remove('tarjeta-preview__bio--vacio');
+  } else {
+    bioEl.textContent = 'Soy un profesional apasionado por mi trabajo y siempre busco nuevas oportunidades para crecer y aprender.';
+    bioEl.classList.add('tarjeta-preview__bio--vacio');
+  }
 
   const redesCont = document.getElementById('preview-redes');
-  redesCont.innerHTML = Object.entries(d.redes || {}).map(([key, url]) => {
-    const label = CONFIG.REDES_SOCIALES.find(r => r.key === key)?.label || key;
-    return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" title="${escapeHtml(label)}">${iconoRedSocial(key)}</a>`;
-  }).join('');
+  const redesEntries = Object.entries(d.redes || {});
+  if (redesEntries.length) {
+    redesCont.innerHTML = redesEntries.map(([key, url]) => {
+      const label = CONFIG.REDES_SOCIALES.find(r => r.key === key)?.label || key;
+      return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" title="${escapeHtml(label)}">${iconoRedSocial(key)}</a>`;
+    }).join('');
+  } else {
+    redesCont.innerHTML = '<span class="tarjeta-preview__redes-vacio">Tus redes sociales aparecerán aquí</span>';
+  }
 
   const contactoCont = document.getElementById('preview-contacto');
+  const fila = (icono, label, valor) => `
+    <div class="tarjeta-preview__contacto-item">
+      <span class="tarjeta-preview__contacto-icono">${iconoContacto(icono)}</span>
+      <span class="tarjeta-preview__contacto-texto">
+        <span class="tarjeta-preview__contacto-label">${escapeHtml(label)}</span>
+        <span class="tarjeta-preview__contacto-valor">${escapeHtml(valor)}</span>
+      </span>
+    </div>`;
   const items = [];
-  if (d.telefono) items.push(`<div class="tarjeta-preview__contacto-item">📞 ${escapeHtml(d.telefono)}</div>`);
-  if (!d.es_whatsapp && d.whatsapp) items.push(`<div class="tarjeta-preview__contacto-item">💬 ${escapeHtml(d.whatsapp)}</div>`);
-  if (d.direccion) items.push(`<div class="tarjeta-preview__contacto-item">📍 ${escapeHtml(d.direccion)}</div>`);
-  if (d.horario_atencion) items.push(`<div class="tarjeta-preview__contacto-item">🕒 ${escapeHtml(d.horario_atencion)}</div>`);
-  contactoCont.innerHTML = items.join('');
+  if (d.telefono) items.push(fila('telefono', 'Teléfono', d.telefono));
+  if (!d.es_whatsapp && d.whatsapp) items.push(fila('whatsapp', 'WhatsApp', d.whatsapp));
+  if (d.direccion) items.push(fila('direccion', 'Ubicación', d.direccion));
+  if (d.horario_atencion) items.push(fila('horario', 'Horario', d.horario_atencion));
+  contactoCont.innerHTML = items.join('') || '<p class="tarjeta-preview__contacto-vacio">Tus datos de contacto aparecerán aquí.</p>';
 }
 
 // ------------------------------------------------------------
@@ -406,3 +433,8 @@ form.addEventListener('submit', async (e) => {
 renderCamposRedes();
 cargarBorradorEnForm();
 document.getElementById('slug-prefijo').textContent = CONFIG.SITE_BASE_URL.replace(/^https?:\/\//, '') + '/u/';
+
+// Los íconos de redes/contacto se cargan de forma asíncrona desde
+// Simple Icons/Lucide (ver utils.js); en cuanto estén listos se
+// repinta la preview para que no se quede con el placeholder.
+window.addEventListener('qr-iconos-listos', actualizarPreview);

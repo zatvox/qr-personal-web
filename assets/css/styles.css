@@ -141,19 +141,51 @@ img { max-width: 100%; display: block; }
    al margin-bottom negativo de __redes, así la zona de color llega
    hasta la mitad de los íconos, igual que en el perfil público. */
 .tarjeta-preview__header {
-  padding: var(--space-lg) var(--space-md);
+  position: relative;
+  padding: var(--space-lg) var(--space-md) calc(var(--space-lg) + 12px);
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   transition: background var(--transition);
 }
 
+/* Borde ondulado que separa la banda de color del cuerpo blanco,
+   inspirado en el diseño de referencia (curva suave en vez de línea
+   recta). El path usa var(--color-bg) para quedar siempre en blanco. */
+.tarjeta-preview__ola {
+  position: absolute;
+  z-index: 1;
+  left: 0; right: 0; bottom: -1px;
+  width: 100%; height: 24px;
+  display: block;
+}
+
+.tarjeta-preview__avatar-wrap {
+  position: relative;
+  width: 96px; height: 96px;
+  margin: 0 auto var(--space-sm);
+}
+
 .tarjeta-preview__avatar {
+  position: absolute; inset: 0;
   width: 96px; height: 96px;
   border-radius: 50%;
   object-fit: cover;
-  margin: 0 auto var(--space-sm);
   background: var(--color-primary-light);
   border: 3px solid #fff;
   box-shadow: var(--shadow-sm);
+}
+
+/* Ícono de silueta que se muestra mientras no se ha elegido ninguna
+   foto de perfil, para que la vista previa no luzca vacía desde el
+   inicio (wizard y dashboard). Se oculta en cuanto hay una imagen. */
+.tarjeta-preview__avatar-placeholder {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  border: 3px solid #fff;
+  box-shadow: var(--shadow-sm);
+  color: var(--gray-500);
+  pointer-events: none;
 }
 
 .tarjeta-preview__nombre { font-size: 1.35rem; margin-bottom: 2px; color: var(--color-on-primary, #fff); }
@@ -162,8 +194,23 @@ img { max-width: 100%; display: block; }
 .tarjeta-preview__body { padding: 0 var(--space-md) var(--space-lg); }
 
 .tarjeta-preview__bio { font-size: 0.9rem; color: var(--gray-600); margin: var(--space-md) 0; }
+.tarjeta-preview__bio--vacio,
+.tarjeta-preview__contacto-vacio,
+.tarjeta-preview__redes-vacio { color: var(--gray-400); font-style: italic; }
+
+.tarjeta-preview__redes-vacio {
+  display: inline-block;
+  font-size: 0.8rem;
+  background: var(--color-bg);
+  color: var(--gray-500);
+  padding: 8px 14px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
 
 .tarjeta-preview__redes {
+  position: relative;
+  z-index: 2;
   display: flex; justify-content: center; gap: var(--space-xs);
   flex-wrap: wrap; margin: var(--space-sm) 0 -19px;
 }
@@ -178,20 +225,52 @@ img { max-width: 100%; display: block; }
   text-decoration: none;
 }
 
+/* Lista de contacto estilo "fila": ícono en círculo + etiqueta pequeña
+   arriba y valor en negrita debajo, separadas por líneas divisorias
+   (inspirado en el diseño de referencia). */
 .tarjeta-preview__contacto {
-  display: flex; flex-direction: column; gap: var(--space-xs);
+  display: flex; flex-direction: column;
   text-align: left;
-  background: var(--gray-50);
+  background: var(--color-bg);
   border-radius: var(--radius-md);
-  padding: var(--space-md);
   font-family: var(--font-body);
 }
 
 .tarjeta-preview__contacto-item {
-  display: flex; gap: var(--space-xs); align-items: center;
-  font-size: 0.9rem;
+  display: flex; gap: var(--space-sm); align-items: center;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
   font-family: var(--font-body);
 }
+
+.tarjeta-preview__contacto-item:last-child { border-bottom: none; }
+
+.tarjeta-preview__contacto-icono {
+  width: 40px; height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.tarjeta-preview__contacto-texto { min-width: 0; }
+
+.tarjeta-preview__contacto-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.tarjeta-preview__contacto-valor {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+a.tarjeta-preview__contacto-valor:hover { text-decoration: underline; }
 
 /* Perfil público: header a todo ancho con fondo degradado.
    Incluye avatar + nombre + cargo + íconos de redes; estos últimos
@@ -199,8 +278,9 @@ img { max-width: 100%; display: block; }
    para que la zona de color llegue hasta la mitad de los íconos,
    igual que en la vista previa del wizard/dashboard. */
 .perfil-header {
+  position: relative;
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-  padding: var(--space-xl) 0 var(--space-md);
+  padding: var(--space-xl) 0 calc(var(--space-md) + 12px);
   color: var(--color-on-primary);
   text-align: center;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);

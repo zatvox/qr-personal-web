@@ -251,13 +251,20 @@
       <aside>
         <div class="tarjeta-preview" style="margin-bottom: var(--space-md);">
           <div class="tarjeta-preview__header" id="preview-header">
-            <img class="tarjeta-preview__avatar" id="preview-avatar" src="" alt="">
+            <div class="tarjeta-preview__avatar-wrap">
+              <img class="tarjeta-preview__avatar" id="preview-avatar" alt="">
+              <span class="tarjeta-preview__avatar-placeholder" id="preview-avatar-placeholder" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="none"><circle cx="12" cy="8.5" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 19.5c1.5-3.5 4.5-5 7.5-5s6 1.5 7.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </span>
+            </div>
             <h3 class="tarjeta-preview__nombre" id="preview-nombre"></h3>
             <p class="tarjeta-preview__cargo" id="preview-cargo"></p>
             <div class="tarjeta-preview__redes" id="preview-redes"></div>
+            <svg class="tarjeta-preview__ola" viewBox="0 0 500 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0,12 C125,24 375,0 500,12 L500,24 L0,24 Z" style="fill:var(--color-bg)"></path></svg>
           </div>
           <div class="tarjeta-preview__body">
             <p class="tarjeta-preview__bio" id="preview-bio"></p>
+            <div class="tarjeta-preview__contacto" id="preview-contacto"></div>
           </div>
         </div>
 

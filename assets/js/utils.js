@@ -217,22 +217,75 @@ export function colorTextoLegible(hexFondo) {
 }
 
 // ------------------------------------------------------------
-// Iconos de redes sociales (SVG inline, monocromo vía currentColor)
-// Se usan en los chips de "tarjeta-preview__redes" (wizard, dashboard
-// y perfil público) en vez de las iniciales de texto.
+// Iconos de redes sociales y de contacto — se cargan en tiempo real
+// desde librerías públicas y gratuitas de código abierto:
+//   - Simple Icons (logos oficiales de marca: Instagram, Facebook,
+//     LinkedIn, X, TikTok, WhatsApp) vía CDN jsDelivr.
+//   - Lucide (íconos genéricos de línea: teléfono, email, ubicación,
+//     horario, globo/web) vía CDN jsDelivr.
+// Ambas son gratuitas (MIT/CC0) y no requieren build ni API key.
+// Como fetch() es asíncrono, se precargan una vez al importar este
+// módulo y se cachean en memoria; iconoRedSocial()/iconoContacto()
+// devuelven el SVG ya cacheado (o un placeholder neutro mientras
+// carga). Cuando terminan de llegar, se dispara el evento
+// "qr-iconos-listos" en window para que la vista que ya se renderizó
+// pueda volver a pintarse con el ícono real.
 // ------------------------------------------------------------
-const ICONOS_REDES = {
-  instagram: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg>',
-  linkedin: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><circle cx="7.7" cy="8.2" r="1.3" fill="currentColor"/><rect x="6.5" y="10.7" width="2.4" height="6.8" fill="currentColor"/><path d="M11.2 10.7h2.3v1.2c.6-.9 1.6-1.5 2.8-1.5 2.2 0 3.2 1.5 3.2 3.9v4.5h-2.4v-4c0-1.1-.4-1.8-1.4-1.8-1 0-1.6.7-1.8 1.3-.1.2-.1.5-.1.8v3.7h-2.6z" fill="currentColor"/></svg>',
-  x: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M4.5 4.5l15 15M19.5 4.5l-15 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
-  facebook: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M14 21v-7.5h2.5l.4-3H14V8.4c0-.9.2-1.5 1.5-1.5H17V4.2C16.7 4.2 15.7 4 14.6 4 12.3 4 10.7 5.4 10.7 8.1v2.4H8.2v3h2.5V21z" fill="currentColor"/></svg>',
-  tiktok: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M13.5 3h2.2c.2 1.7 1.3 3.1 3 3.5v2.3c-1.1-.1-2.1-.5-3-1.1v5.9a4.3 4.3 0 1 1-4.3-4.3c.2 0 .4 0 .6.1v2.3a2 2 0 1 0 1.9 2V3z" fill="currentColor"/></svg>',
-  web: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18" stroke="currentColor" stroke-width="1.8"/></svg>',
+const SIMPLE_ICONS_SLUG = {
+  instagram: 'instagram', facebook: 'facebook', linkedin: 'linkedin',
+  x: 'x', tiktok: 'tiktok', whatsapp: 'whatsapp',
+};
+const LUCIDE_SLUG = {
+  telefono: 'phone', email: 'mail', direccion: 'map-pin',
+  horario: 'clock', web: 'globe',
 };
 
-/** Devuelve el SVG inline de la red social (o un globo genérico si no se reconoce la clave) */
+const _iconosCache = {}; // key -> SVG string ya lista para usar
+const _ICONO_PLACEHOLDER = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6" opacity="0.4"/></svg>';
+
+async function cargarIconoRemoto(cacheKey, url, { modo }) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    let svg = await res.text();
+    // Simple Icons no trae currentColor: se inyecta para que el ícono
+    // responda al color del círculo donde se dibuja (igual que Lucide,
+    // que ya viene con stroke="currentColor" por defecto).
+    if (modo === 'fill') {
+      svg = svg.replace('<svg', '<svg fill="currentColor" width="20" height="20"');
+    } else {
+      svg = svg.replace('<svg', '<svg width="20" height="20"');
+    }
+    _iconosCache[cacheKey] = svg;
+  } catch (err) {
+    console.warn(`No se pudo cargar el ícono "${cacheKey}" desde la librería pública:`, err);
+  }
+}
+
+async function precargarTodosLosIconos() {
+  const tareas = [];
+  for (const [key, slug] of Object.entries(SIMPLE_ICONS_SLUG)) {
+    tareas.push(cargarIconoRemoto(`redes:${key}`, `https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/${slug}.svg`, { modo: 'fill' }));
+  }
+  for (const [key, slug] of Object.entries(LUCIDE_SLUG)) {
+    tareas.push(cargarIconoRemoto(`contacto:${key}`, `https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/${slug}.svg`, { modo: 'stroke' }));
+  }
+  await Promise.allSettled(tareas);
+  window.dispatchEvent(new CustomEvent('qr-iconos-listos'));
+}
+precargarTodosLosIconos();
+
+/** Devuelve el SVG inline (ya cacheado) del logo de la red social, o un placeholder mientras carga */
 export function iconoRedSocial(key) {
-  return ICONOS_REDES[key] || ICONOS_REDES.web;
+  // "web" (Sitio web) no es una marca: usa el ícono genérico de globo (Lucide)
+  if (key === 'web') return _iconosCache['contacto:web'] || _ICONO_PLACEHOLDER;
+  return _iconosCache[`redes:${key}`] || _ICONO_PLACEHOLDER;
+}
+
+/** Devuelve el SVG inline (ya cacheado) del ítem de contacto (teléfono, email, etc.) */
+export function iconoContacto(key) {
+  if (key === 'whatsapp') return _iconosCache['redes:whatsapp'] || _ICONO_PLACEHOLDER; // logo de marca (Simple Icons)
+  return _iconosCache[`contacto:${key}`] || _iconosCache['contacto:web'] || _ICONO_PLACEHOLDER;
 }
 
 // ------------------------------------------------------------

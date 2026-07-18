@@ -79,11 +79,17 @@ create policy "slugs_reservados_select_publico" on public.slugs_reservados
 
 -- ============================================================
 -- STORAGE: buckets y políticas
--- Crear buckets desde el dashboard de Supabase o vía SQL:
---   insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true);
---   insert into storage.buckets (id, name, public) values ('gallery', 'gallery', true);
 -- Estructura de paths: {user_id}/archivo.ext
+-- Los buckets se crean aquí mismo (idempotente); si ya existen no falla.
 -- ============================================================
+
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+insert into storage.buckets (id, name, public)
+values ('gallery', 'gallery', true)
+on conflict (id) do nothing;
 
 drop policy if exists "avatars_lectura_publica" on storage.objects;
 create policy "avatars_lectura_publica" on storage.objects
