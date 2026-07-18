@@ -219,6 +219,16 @@ function recolectarCambios() {
 }
 
 // ------------------------------------------------------------
+// Foto de perfil: preview inmediata al elegir archivo (no esperar
+// a "Guardar cambios"), igual que en el wizard.
+// ------------------------------------------------------------
+document.getElementById('avatar-file').addEventListener('change', (e) => {
+  const archivo = e.target.files[0];
+  if (!archivo) return;
+  document.getElementById('preview-avatar').src = URL.createObjectURL(archivo);
+});
+
+// ------------------------------------------------------------
 // Galería: render + subir + borrar (con compresión cliente, ADR-005)
 // ------------------------------------------------------------
 function renderGaleria() {

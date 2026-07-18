@@ -9,8 +9,16 @@ export const CONFIG = {
   SUPABASE_URL: 'https://xhhazsciafiurnshtvpk.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoaGF6c2NpYWZpdXJuc2h0dnBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTEyMTgsImV4cCI6MjA5ODc2NzIxOH0.iGM88zyTGsy80LKwNh8rJmXE_z2zxa4JD1QisYD7uII',
 
-  // Dominio base público (para armar el link del QR). Ej: usuario.github.io/repo
-  SITE_BASE_URL: window.location.origin + window.location.pathname.replace(/index\.html$/, '').replace(/\/$/, ''),
+  // Dominio base público (para armar el link corto /u/slug del QR).
+  // Se calcula como la raíz del repo (usuario.github.io/nombre-repo),
+  // sin importar desde qué página (index, pages/dashboard.html, etc.)
+  // se cargue este archivo — así el link nunca arrastra "/pages/...".
+  // Ver 404.html (ADR-003): las rutas /u/slug redirigen desde la raíz.
+  SITE_BASE_URL: (() => {
+    const segmentos = window.location.pathname.split('/').filter(Boolean);
+    const repo = segmentos[0] || ''; // primer segmento = nombre del repo (project pages)
+    return window.location.origin + (repo ? '/' + repo : '');
+  })(),
 
   // Wizard
   TOAST_DURATION_MS: 4000,

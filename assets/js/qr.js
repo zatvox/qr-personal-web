@@ -28,7 +28,7 @@ export async function renderizarQR(contenedor, texto, opciones = {}) {
     el.innerHTML = '';
     // eslint-disable-next-line no-undef
     new QRCode(el, {
-      text,
+      text: texto,
       width: opciones.width || 220,
       height: opciones.height || 220,
       colorDark: opciones.colorDark || '#111827',
