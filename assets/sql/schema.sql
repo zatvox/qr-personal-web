@@ -68,6 +68,13 @@ create table if not exists public.gallery_images (
   profile_id  uuid not null references public.profiles(id) on delete cascade,
   storage_path text not null,
   orden       int not null default 0,
+  -- Metadatos opcionales de portafolio: cada foto puede tener su
+  -- propio título, descripción y enlace externo (ej. un trabajo,
+  -- producto o proyecto), para que la galería funcione como un
+  -- mini-portafolio y no solo una cuadrícula de imágenes sueltas.
+  titulo      text,
+  descripcion text,
+  url_link    text,
   created_at  timestamptz not null default now()
 );
 

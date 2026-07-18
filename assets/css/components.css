@@ -192,11 +192,26 @@ table.data-table th, table.data-table td {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Galería del dashboard: miniatura + botón de borrar */
-.galeria-item { position: relative; }
-.galeria-item img {
+/* Editor de galería del dashboard: cada foto es una tarjeta con
+   miniatura + campos de título/descripción/enlace (portafolio). */
+.galeria-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+
+.galeria-item--editable {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  background: var(--gray-50);
+}
+
+.galeria-item__imagen-wrap { position: relative; margin-bottom: var(--space-sm); }
+.galeria-item__imagen-wrap img {
   width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
   border-radius: var(--radius-sm);
+  display: block;
 }
 .galeria-item__borrar {
   position: absolute; top: 6px; right: 6px;
@@ -210,6 +225,7 @@ table.data-table th, table.data-table td {
   box-shadow: var(--shadow-sm);
 }
 .galeria-item__borrar:hover { background: #fff; }
+.galeria-item__estado { min-height: 1.2em; }
 
 /* ------------------------------------------------------------
    Acordeón de secciones (wizard/dashboard), estilo qr-code.io

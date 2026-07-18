@@ -5,10 +5,10 @@ import { CONFIG } from './config.js';
 import { protegerPagina, cerrarSesion } from './auth.js';
 import {
   obtenerMiPerfil, actualizarPerfil, subirAvatar,
-  obtenerGaleria, agregarFotoGaleria, eliminarFotoGaleria,
+  obtenerGaleria, agregarFotoGaleria, eliminarFotoGaleria, actualizarFotoGaleria,
 } from './supabase-data.js';
 import { renderizarQR, descargarQR } from './qr.js';
-import { escapeHtml, comprimirImagen, base64ADataBlob, esHexValido, mezclarConBlanco, iconoRedSocial, iconoContacto, cargarGoogleFont, colorTextoLegible } from './utils.js';
+import { escapeHtml, comprimirImagen, base64ADataBlob, esHexValido, mezclarConBlanco, iconoRedSocial, iconoContacto, cargarGoogleFont, colorTextoLegible, debounce } from './utils.js';
 import { getSupabaseClient } from './supabase-client.js';
 
 const CAMPOS_TEXTO = ['nombre_completo', 'cargo', 'empresa', 'bio', 'telefono', 'whatsapp', 'direccion', 'horario_atencion', 'video_url'];
@@ -270,17 +270,66 @@ document.getElementById('avatar-file').addEventListener('change', (e) => {
 // ------------------------------------------------------------
 // Galería: render + subir + borrar (con compresión cliente, ADR-005)
 // ------------------------------------------------------------
+// Autoguardado por foto (debounced) para no disparar una petición por
+// cada tecla al escribir título/descripción/enlace de cada imagen.
+// Se usa un debounce independiente por cada campo (id+campo) para que
+// escribir en una foto no cancele el guardado pendiente de otra.
+async function guardarMetadataInmediato(id, cambios, indicadorEl) {
+  try {
+    if (indicadorEl) { indicadorEl.textContent = 'Guardando...'; indicadorEl.className = 'form-hint'; }
+    const actualizado = await actualizarFotoGaleria(id, cambios);
+    const idx = galeriaActual.findIndex(f => f.id === id);
+    if (idx !== -1) galeriaActual[idx] = { ...galeriaActual[idx], ...actualizado };
+    if (indicadorEl) { indicadorEl.textContent = 'Guardado ✓'; indicadorEl.className = 'form-success'; }
+  } catch (err) {
+    console.error(err);
+    if (indicadorEl) { indicadorEl.textContent = 'No se pudo guardar.'; indicadorEl.className = 'form-error'; }
+  }
+}
+const _debouncersPorCampo = new Map();
+function guardarMetadataDebounced(id, cambios, indicadorEl) {
+  const clave = `${id}:${Object.keys(cambios)[0]}`;
+  if (!_debouncersPorCampo.has(clave)) {
+    _debouncersPorCampo.set(clave, debounce((...args) => guardarMetadataInmediato(...args), 700));
+  }
+  _debouncersPorCampo.get(clave)(id, cambios, indicadorEl);
+}
+
 function renderGaleria() {
   const grid = document.getElementById('galeria-grid');
   const contador = document.getElementById('galeria-contador');
   contador.textContent = `${galeriaActual.length} de ${CONFIG.GALERIA_MAX_FOTOS} fotos usadas`;
 
   grid.innerHTML = galeriaActual.map(foto => `
-    <div class="galeria-item" data-id="${foto.id}">
-      <img src="${escapeHtml(foto.url)}" alt="Foto de galería">
-      <button type="button" class="galeria-item__borrar" data-borrar-id="${foto.id}" data-borrar-path="${escapeHtml(foto.storage_path)}" aria-label="Borrar foto">&times;</button>
+    <div class="galeria-item galeria-item--editable" data-id="${foto.id}">
+      <div class="galeria-item__imagen-wrap">
+        <img src="${escapeHtml(foto.url)}" alt="Foto de galería">
+        <button type="button" class="galeria-item__borrar" data-borrar-id="${foto.id}" data-borrar-path="${escapeHtml(foto.storage_path)}" aria-label="Borrar foto">&times;</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Título</label>
+        <input class="form-input" type="text" maxlength="80" data-campo="titulo" data-id="${foto.id}" value="${escapeHtml(foto.titulo || '')}" placeholder="Ej. Proyecto de branding">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-textarea" maxlength="200" data-campo="descripcion" data-id="${foto.id}" placeholder="Breve descripción de esta foto o proyecto">${escapeHtml(foto.descripcion || '')}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Enlace (opcional)</label>
+        <input class="form-input" type="url" data-campo="url_link" data-id="${foto.id}" value="${escapeHtml(foto.url_link || '')}" placeholder="https://...">
+      </div>
+      <p class="form-hint galeria-item__estado" data-estado-id="${foto.id}">&nbsp;</p>
     </div>
   `).join('');
+
+  grid.querySelectorAll('[data-campo]').forEach(input => {
+    input.addEventListener('input', () => {
+      const id = input.dataset.id;
+      const campo = input.dataset.campo;
+      const indicadorEl = grid.querySelector(`[data-estado-id="${id}"]`);
+      guardarMetadataDebounced(id, { [campo]: input.value.trim() }, indicadorEl);
+    });
+  });
 
   grid.querySelectorAll('[data-borrar-id]').forEach(btn => {
     btn.addEventListener('click', async () => {

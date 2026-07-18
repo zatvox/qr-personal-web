@@ -122,14 +122,26 @@ async function render(perfil) {
     document.getElementById('p-horario-card').style.display = 'block';
   }
 
-  // Galería
+  // Galería (mini-portafolio): imagen + título + descripción + enlace opcional
   try {
     const fotos = await obtenerGaleria(perfil.id);
     if (fotos.length) {
-      document.getElementById('p-galeria').innerHTML = fotos
-        .map(f => `<img src="${escapeHtml(f.url)}" alt="Foto de galería" loading="lazy">`)
-        .join('');
+      document.getElementById('p-galeria').innerHTML = fotos.map(f => `
+        <div class="perfil-galeria__item">
+          <img src="${escapeHtml(f.url)}" alt="${escapeHtml(f.titulo || 'Foto de galería')}" loading="lazy">
+          ${(f.titulo || f.descripcion || f.url_link) ? `
+            <div class="perfil-galeria__item-texto">
+              ${f.titulo ? `<p class="perfil-galeria__item-titulo">${escapeHtml(f.titulo)}</p>` : ''}
+              ${f.descripcion ? `<p class="perfil-galeria__item-desc">${escapeHtml(f.descripcion)}</p>` : ''}
+              ${f.url_link ? `<a class="perfil-galeria__item-link" href="${escapeHtml(f.url_link)}" target="_blank" rel="noopener">Ver más →</a>` : ''}
+            </div>` : ''}
+        </div>
+      `).join('');
       document.getElementById('p-galeria-card').style.display = 'block';
+
+      document.querySelectorAll('#p-galeria .perfil-galeria__item img').forEach(img => {
+        img.addEventListener('click', () => abrirLightbox(img.src, img.alt));
+      });
     }
   } catch (err) {
     console.warn('No se pudo cargar la galería:', err);
@@ -167,6 +179,36 @@ async function init() {
 // al terminar de llegar se repintan sobre el perfil ya renderizado.
 window.addEventListener('qr-iconos-listos', () => {
   if (_ultimoPerfilRenderizado) pintarIconos(_ultimoPerfilRenderizado);
+});
+
+// ------------------------------------------------------------
+// Lightbox de la galería: click en una foto la agranda en el centro;
+// click fuera de la imagen (fondo oscuro), en la X o tecla Esc la
+// vuelve a encoger a su lugar.
+// ------------------------------------------------------------
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightbox-img');
+
+function abrirLightbox(src, alt) {
+  lightboxImg.src = src;
+  lightboxImg.alt = alt || '';
+  lightbox.classList.add('lightbox--visible');
+  lightbox.setAttribute('aria-hidden', 'false');
+}
+
+function cerrarLightbox() {
+  lightbox.classList.remove('lightbox--visible');
+  lightbox.setAttribute('aria-hidden', 'true');
+}
+
+// Cierra al hacer click en el fondo, pero no si el click fue sobre la
+// imagen agrandada (solo "fuera de la imagen" debe encogerla).
+lightbox.addEventListener('click', (e) => {
+  if (e.target === lightbox) cerrarLightbox();
+});
+document.getElementById('lightbox-cerrar').addEventListener('click', cerrarLightbox);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') cerrarLightbox();
 });
 
 init();

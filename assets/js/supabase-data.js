@@ -108,6 +108,22 @@ export async function agregarFotoGaleria(userId, profileId, blob, orden = 0) {
   return { ...data, url: pub.publicUrl };
 }
 
+/**
+ * Actualiza los metadatos de portafolio de una foto de galería
+ * (título, descripción y/o enlace externo opcional).
+ */
+export async function actualizarFotoGaleria(id, cambios) {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase
+    .from('gallery_images')
+    .update(cambios)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 /** Elimina una foto de galería: borra el objeto del Storage y la fila en DB */
 export async function eliminarFotoGaleria(id, storagePath) {
   const supabase = await getSupabaseClient();

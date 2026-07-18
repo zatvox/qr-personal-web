@@ -304,16 +304,109 @@ a.tarjeta-preview__contacto-valor:hover { text-decoration: underline; }
 }
 .btn-perfil-accion:hover { background: var(--gray-100); }
 
+/* Galería pública como mini-portafolio: cada foto es una tarjeta con
+   imagen + título + descripción + enlace externo opcional ("Ver más"). */
 .perfil-galeria {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-xs);
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-sm);
 }
 
-.perfil-galeria img {
-  border-radius: var(--radius-sm);
+.perfil-galeria__item {
+  text-align: left;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--gray-50);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.perfil-galeria__item img {
+  width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+}
+
+.perfil-galeria__item-texto { padding: var(--space-xs) var(--space-sm) var(--space-sm); }
+
+.perfil-galeria__item-titulo {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 2px;
+}
+
+.perfil-galeria__item-desc {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  margin: 0 0 var(--space-xs);
+}
+
+.perfil-galeria__item-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.perfil-galeria__item-link:hover { text-decoration: underline; }
+
+/* Lightbox: al hacer click en una foto de la galería, se agranda en el
+   centro de la pantalla; click fuera de la imagen (en el fondo oscuro)
+   la vuelve a encoger a su lugar. Se anima con opacity + scale. */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  background: rgba(15, 15, 20, 0.88);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease;
+}
+
+.lightbox--visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox img {
+  max-width: min(90vw, 640px);
+  max-height: 85vh;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.82);
+  transition: transform 0.25s ease;
+  cursor: default;
+}
+
+.lightbox--visible img {
+  transform: scale(1);
+}
+
+.lightbox__cerrar {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.92);
+  color: var(--gray-900);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.lightbox__cerrar:hover { background: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox, .lightbox img { transition: none; }
 }
 
 .perfil-video {

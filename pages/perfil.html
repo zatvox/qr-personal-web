@@ -55,20 +55,27 @@
       <div class="perfil-video" id="p-video"></div>
     </div>
 
-    <div class="card" id="p-galeria-card" style="display:none; margin-bottom: var(--space-md);">
-      <h2>Galería</h2>
-      <div class="perfil-galeria" id="p-galeria"></div>
-    </div>
-
-    <div class="card" id="p-horario-card" style="display:none;">
+    <div class="card" id="p-horario-card" style="display:none; margin-bottom: var(--space-md);">
       <h2>Horario de atención</h2>
       <p id="p-horario"></p>
+    </div>
+
+    <div class="card" id="p-galeria-card" style="display:none;">
+      <h2>Galería</h2>
+      <div class="perfil-galeria" id="p-galeria"></div>
     </div>
 
     <p style="text-align:center; margin-top: var(--space-lg); font-size: 0.8rem; color: var(--gray-600);">
       Creado con <a href="../index.html">QR Personal System</a> — crea la tuya gratis
     </p>
   </div>
+</div>
+
+<!-- Lightbox: al hacer click en una foto de la galería se agranda aquí;
+     click fuera de la imagen (o en la X / tecla Esc) la vuelve a encoger. -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button type="button" class="lightbox__cerrar" id="lightbox-cerrar" aria-label="Cerrar imagen">&times;</button>
+  <img id="lightbox-img" src="" alt="">
 </div>
 
 <script type="module" src="../assets/js/perfil.js"></script>
