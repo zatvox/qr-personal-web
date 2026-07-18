@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crea tu tarjeta digital y tu QR gratis | QR Personal System</title>
+<meta name="description" content="Crea tu página personal y genera tu código QR único gratis. Comparte tu contacto, redes y más en segundos.">
+<link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<header class="container">
+  <nav class="navbar">
+    <span class="navbar__logo"><img src="assets/images/logo.svg" alt="" width="32" height="32"> QR Personal System</span>
+    <a class="btn btn-tertiary" href="pages/login.html">Ya tengo cuenta</a>
+  </nav>
+</header>
+
+<main class="container">
+  <section style="text-align:center; padding: var(--space-md) 0 var(--space-lg);">
+    <h1>Crea tu tarjeta de presentación digital</h1>
+    <p style="color: var(--gray-600); max-width: 560px; margin: 0 auto;">
+      Completa tus datos, mira el resultado en vivo y obtén tu código QR único. 100% gratis.
+    </p>
+  </section>
+
+  <form id="wizard-form" novalidate>
+    <div class="wizard-layout">
+
+      <!-- ================= SECCIONES DESPLEGABLES ================= -->
+      <div>
+
+        <!-- Sección: Diseño -->
+        <details class="accordion-section" open data-seccion="diseno">
+          <summary>
+            <span class="accordion-section__icono">🎨</span>
+            <span class="accordion-section__texto">
+              <div>Diseño</div>
+              <div class="accordion-section__hint">Elige un tema de color para tu página</div>
+            </span>
+            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="accordion-section__body">
+            <p class="paleta-picker__label">Paleta de colores</p>
+            <div class="paleta-swatches" id="paleta-swatches"><!-- generado por wizard.js desde CONFIG.PALETAS_PRESET --></div>
+
+            <div class="paleta-editor">
+              <div class="form-group">
+                <label class="form-label" for="color-primario-hex">Color primario</label>
+                <div class="color-input-wrap">
+                  <input type="color" id="color-primario-picker" aria-label="Selector de color primario">
+                  <input type="text" id="color-primario-hex" maxlength="7" placeholder="#RRGGBB">
+                </div>
+              </div>
+
+              <button type="button" class="btn-swap-colores" id="btn-swap-colores" aria-label="Intercambiar colores">⇄</button>
+
+              <div class="form-group">
+                <label class="form-label" for="color-secundario-hex">Color secundario</label>
+                <div class="color-input-wrap">
+                  <input type="color" id="color-secundario-picker" aria-label="Selector de color secundario">
+                  <input type="text" id="color-secundario-hex" maxlength="7" placeholder="#RRGGBB">
+                </div>
+              </div>
+            </div>
+
+            <div class="fuentes-picker">
+              <p class="paleta-picker__label">Fuentes</p>
+              <div class="fuentes-grid">
+                <div class="form-group">
+                  <label class="form-label" for="fuente-titulo">Título</label>
+                  <select class="form-select" id="fuente-titulo"></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="fuente-texto">Textos</label>
+                  <select class="form-select" id="fuente-texto"></select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Sección: Información personal -->
+        <details class="accordion-section" data-seccion="personal">
+          <summary>
+            <span class="accordion-section__icono">👤</span>
+            <span class="accordion-section__texto">
+              <div>Información personal</div>
+              <div class="accordion-section__hint">Nombre, foto, cargo y descripción</div>
+            </span>
+            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="accordion-section__body">
+
+            <div class="form-group">
+              <label class="form-label" for="nombre_completo">Nombre completo *</label>
+              <input class="form-input" type="text" id="nombre_completo" name="nombre_completo" required maxlength="100" placeholder="Ej. María Gómez">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="foto-file">Foto de perfil</label>
+              <input class="form-input" type="file" id="foto-file" accept="image/png, image/jpeg, image/webp">
+              <p class="form-hint">JPG, PNG o WEBP. Se optimiza automáticamente al subirla.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cargo">Cargo / profesión</label>
+              <input class="form-input" type="text" id="cargo" name="cargo" maxlength="100" placeholder="Ej. Diseñadora UX">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="empresa">Empresa / negocio</label>
+              <input class="form-input" type="text" id="empresa" name="empresa" maxlength="100" placeholder="Ej. Estudio Creativo SAC">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="bio">Breve descripción</label>
+              <textarea class="form-textarea" id="bio" name="bio" maxlength="280" placeholder="Cuéntale al mundo quién eres en pocas palabras"></textarea>
+            </div>
+          </div>
+        </details>
+
+        <!-- Sección: Información de contacto -->
+        <details class="accordion-section" data-seccion="contacto">
+          <summary>
+            <span class="accordion-section__icono">☎️</span>
+            <span class="accordion-section__texto">
+              <div>Información de contacto</div>
+              <div class="accordion-section__hint">Teléfono, WhatsApp y dirección</div>
+            </span>
+            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="accordion-section__body">
+
+            <div class="form-group">
+              <label class="form-label" for="telefono">Teléfono</label>
+              <input class="form-input" type="tel" id="telefono" name="telefono" placeholder="+51 999 999 999">
+            </div>
+
+            <div class="form-group form-check">
+              <input type="checkbox" id="es_whatsapp" name="es_whatsapp" checked>
+              <label class="form-label" for="es_whatsapp" style="margin:0;">Este número también es mi WhatsApp</label>
+            </div>
+
+            <div class="form-group" id="whatsapp-wrap" style="display:none;">
+              <label class="form-label" for="whatsapp">Número de WhatsApp</label>
+              <input class="form-input" type="tel" id="whatsapp" name="whatsapp" placeholder="+51 999 999 999">
+              <p class="form-hint">Ingresa el número solo si es distinto al de llamadas.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="direccion">Dirección</label>
+              <input class="form-input" type="text" id="direccion" name="direccion" maxlength="150" placeholder="Ciudad, referencia...">
+            </div>
+
+            <div class="form-group form-check">
+              <input type="checkbox" id="mostrar_email" name="mostrar_email">
+              <label class="form-label" for="mostrar_email" style="margin:0;">Mostrar mi email de cuenta en la tarjeta pública</label>
+            </div>
+          </div>
+        </details>
+
+        <!-- Sección: Redes sociales -->
+        <details class="accordion-section" data-seccion="redes">
+          <summary>
+            <span class="accordion-section__icono">🌐</span>
+            <span class="accordion-section__texto">
+              <div>Redes sociales</div>
+              <div class="accordion-section__hint">Añade enlaces a tus redes</div>
+            </span>
+            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="accordion-section__body">
+            <div id="redes-campos"><!-- generado por wizard.js desde CONFIG.REDES_SOCIALES --></div>
+          </div>
+        </details>
+
+        <!-- Sección: Toques finales -->
+        <details class="accordion-section" data-seccion="extras">
+          <summary>
+            <span class="accordion-section__icono">✨</span>
+            <span class="accordion-section__texto">
+              <div>Toques finales</div>
+              <div class="accordion-section__hint">Horario, video y tu link único</div>
+            </span>
+            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="accordion-section__body">
+
+            <div class="form-group">
+              <label class="form-label" for="horario_atencion">Horario de atención</label>
+              <input class="form-input" type="text" id="horario_atencion" name="horario_atencion" maxlength="100" placeholder="Lun-Vie 9am-6pm">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="video_url">Video (YouTube/Vimeo, opcional)</label>
+              <input class="form-input" type="url" id="video_url" name="video_url" placeholder="https://youtube.com/watch?v=...">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="slug">Tu link único *</label>
+              <div class="slug-input-wrap">
+                <span id="slug-prefijo">tusitio.com/u/</span>
+                <input class="form-input" type="text" id="slug" name="slug" required minlength="3" maxlength="40" placeholder="tu-nombre">
+              </div>
+              <p class="form-hint" id="slug-estado">Elige un identificador único, sin espacios ni acentos.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- Tarjeta final fija: crear cuenta (no es desplegable, siempre visible) -->
+        <div class="card" style="margin-top: var(--space-md);">
+          <h2>Crea tu cuenta para generar tu QR</h2>
+          <p class="form-hint">Tus datos ya están listos. Solo falta confirmar tu correo para publicar tu tarjeta y generar tu código QR.</p>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Correo electrónico *</label>
+            <input class="form-input" type="email" id="email" name="email" required placeholder="tu@correo.com">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Contraseña *</label>
+            <input class="form-input" type="password" id="password" name="password" required minlength="8" placeholder="Mínimo 8 caracteres">
+          </div>
+
+          <div id="registro-error" class="form-error" role="alert" style="display:none;"></div>
+          <div id="registro-exito" class="form-success" role="status" style="display:none;"></div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btn-registrar">Crear cuenta y generar mi QR</button>
+        </div>
+      </div>
+
+      <!-- ================= PREVIEW EN VIVO ================= -->
+      <aside class="tarjeta-preview" aria-label="Vista previa de tu tarjeta">
+        <div class="tarjeta-preview__header" id="preview-header">
+          <img class="tarjeta-preview__avatar" id="preview-avatar" src="" alt="" data-placeholder="👤">
+          <h3 class="tarjeta-preview__nombre" id="preview-nombre">Tu nombre aquí</h3>
+          <p class="tarjeta-preview__cargo" id="preview-cargo">Tu cargo / empresa</p>
+          <div class="tarjeta-preview__redes" id="preview-redes"></div>
+        </div>
+        <div class="tarjeta-preview__body">
+          <p class="tarjeta-preview__bio" id="preview-bio"></p>
+          <div class="tarjeta-preview__contacto" id="preview-contacto"></div>
+        </div>
+      </aside>
+
+    </div>
+  </form>
+</main>
+
+<footer class="container" style="text-align:center; color: var(--gray-600); padding: var(--space-lg) 0; font-size: 0.85rem;">
+  © 2026 QR Personal System · Gratis para siempre
+</footer>
+
+<script type="module" src="assets/js/wizard.js"></script>
+</body>
+</html>

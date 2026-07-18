@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarjeta de presentación</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="../assets/images/logo.svg">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .perfil-wrap { max-width: 520px; margin: 0 auto; padding-bottom: var(--space-xl); }
+  .perfil-avatar {
+    width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+    border: 4px solid #fff; box-shadow: var(--shadow-md);
+    display: block; background: var(--gray-100);
+  }
+  .perfil-acciones { display:flex; gap: var(--space-sm); flex-wrap: wrap; justify-content:center; margin: var(--space-md) 0; }
+</style>
+</head>
+<body>
+
+<div id="estado-carga" class="estado-mensaje"><span class="spinner"></span><p>Cargando tarjeta...</p></div>
+<div id="estado-no-encontrado" class="estado-mensaje" style="display:none;">
+  <h1>Tarjeta no encontrada</h1>
+  <p>Este perfil no existe o ya no está disponible.</p>
+  <a class="btn btn-primary" href="../index.html">Crear mi propia tarjeta</a>
+</div>
+
+<div id="perfil-contenido" style="display:none;">
+  <div class="perfil-header">
+    <div class="container">
+      <img id="p-avatar" class="perfil-avatar" src="" alt="">
+      <h1 id="p-nombre" style="color: var(--color-on-primary);"></h1>
+      <p id="p-cargo" style="color: var(--color-on-primary); opacity:0.85;"></p>
+      <div class="tarjeta-preview__redes" id="p-redes"></div>
+    </div>
+  </div>
+
+  <div class="container perfil-wrap">
+    <p id="p-bio" style="text-align:center; color: var(--gray-600); margin-top: var(--space-md);"></p>
+
+    <div class="perfil-acciones">
+      <button class="btn btn-perfil-accion" id="btn-guardar-contacto">📇 Guardar contacto</button>
+      <a class="btn btn-perfil-accion" id="p-whatsapp-link" href="#" target="_blank" rel="noopener" style="display:none;">💬 WhatsApp</a>
+    </div>
+
+    <div class="card" id="p-contacto-card" style="margin-bottom: var(--space-md);">
+      <h2>Contacto</h2>
+      <div class="tarjeta-preview__contacto" id="p-contacto"></div>
+    </div>
+
+    <div class="card" id="p-video-card" style="display:none; margin-bottom: var(--space-md);">
+      <h2>Video</h2>
+      <div class="perfil-video" id="p-video"></div>
+    </div>
+
+    <div class="card" id="p-galeria-card" style="display:none; margin-bottom: var(--space-md);">
+      <h2>Galería</h2>
+      <div class="perfil-galeria" id="p-galeria"></div>
+    </div>
+
+    <div class="card" id="p-horario-card" style="display:none;">
+      <h2>Horario de atención</h2>
+      <p id="p-horario"></p>
+    </div>
+
+    <p style="text-align:center; margin-top: var(--space-lg); font-size: 0.8rem; color: var(--gray-600);">
+      Creado con <a href="../index.html">QR Personal System</a> — crea la tuya gratis
+    </p>
+  </div>
+</div>
+
+<script type="module" src="../assets/js/perfil.js"></script>
+</body>
+</html>

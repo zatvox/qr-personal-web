@@ -1,0 +1,50 @@
+/* ============================================================
+   RESPONSIVE — Mobile First (320, 640, 1024, 1440, 1920)
+============================================================ */
+
+/* Base: móvil (320px+) ya cubierta en styles.css como default */
+
+.wizard-layout {
+  grid-template-columns: 1fr; /* móvil: apilado */
+}
+
+.tarjeta-preview {
+  position: static;
+  order: -1; /* preview arriba en móvil */
+}
+
+.perfil-galeria {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* 640px: tablets pequeñas */
+@media (min-width: 640px) {
+  .perfil-galeria { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* 1024px: layout de escritorio con preview lateral fijo */
+@media (min-width: 1024px) {
+  .wizard-layout {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+  .tarjeta-preview {
+    position: sticky;
+    order: 0;
+  }
+}
+
+/* 1440px: más aire lateral */
+@media (min-width: 1440px) {
+  .container { max-width: 1200px; }
+}
+
+/* 1920px+ */
+@media (min-width: 1920px) {
+  .container { max-width: 1320px; }
+}
+
+/* Ajustes de toast en móvil: ancho completo */
+@media (max-width: 639px) {
+  #toast-container { align-items: stretch; }
+  .toast { max-width: none; }
+}

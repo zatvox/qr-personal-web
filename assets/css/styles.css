@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('variables.css');
+@import url('components.css');
+@import url('responsive.css');
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-page-bg);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  line-height: 1.25;
+  margin: 0 0 var(--space-sm);
+}
+
+/* Los párrafos deben referenciar la variable directamente: si solo
+   heredaran el font-family ya resuelto de <body>, un cambio de
+   --font-body más abajo en el árbol (preview de "Diseño", perfil
+   público) no se reflejaría en vivo. Ver fix de fuentes en tiempo real. */
+p { font-family: var(--font-body); }
+
+a { color: var(--color-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img { max-width: 100%; display: block; }
+
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ------------------------------------------------------------
+   Header / Navbar simple
+------------------------------------------------------------ */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) 0;
+}
+
+.navbar__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+}
+.navbar__logo img { width: 32px; height: 32px; border-radius: 8px; }
+
+/* ------------------------------------------------------------
+   Layout wizard: formulario + preview lado a lado
+------------------------------------------------------------ */
+.wizard-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--space-lg);
+  align-items: start;
+  padding: var(--space-lg) 0 var(--space-xl);
+}
+
+.wizard-pasos {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.wizard-paso-indicador {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 2px solid var(--color-border);
+}
+
+.wizard-paso-indicador.activo {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.wizard-paso-indicador.completo {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #fff;
+}
+
+.wizard-paso { display: none; }
+.wizard-paso.activo { display: block; }
+
+/* ------------------------------------------------------------
+   Preview de tarjeta (vive en wizard, dashboard y perfil público)
+------------------------------------------------------------ */
+.tarjeta-preview {
+  position: sticky;
+  top: var(--space-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Banda de color que refleja la paleta elegida en "Diseño", en tiempo
+   real. Incluye avatar + nombre + cargo + íconos de redes (como último
+   hijo): estos últimos se pintan a medias fuera del degradado gracias
+   al margin-bottom negativo de __redes, así la zona de color llega
+   hasta la mitad de los íconos, igual que en el perfil público. */
+.tarjeta-preview__header {
+  padding: var(--space-lg) var(--space-md);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  transition: background var(--transition);
+}
+
+.tarjeta-preview__avatar {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto var(--space-sm);
+  background: var(--color-primary-light);
+  border: 3px solid #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.tarjeta-preview__nombre { font-size: 1.35rem; margin-bottom: 2px; color: var(--color-on-primary, #fff); }
+.tarjeta-preview__cargo { font-size: 0.95rem; margin-bottom: 0; color: var(--color-on-primary, #fff); opacity: 0.9; }
+
+.tarjeta-preview__body { padding: 0 var(--space-md) var(--space-lg); }
+
+.tarjeta-preview__bio { font-size: 0.9rem; color: var(--gray-600); margin: var(--space-md) 0; }
+
+.tarjeta-preview__redes {
+  display: flex; justify-content: center; gap: var(--space-xs);
+  flex-wrap: wrap; margin: var(--space-sm) 0 -19px;
+}
+
+.tarjeta-preview__redes a {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--gray-900);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+
+.tarjeta-preview__contacto {
+  display: flex; flex-direction: column; gap: var(--space-xs);
+  text-align: left;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-family: var(--font-body);
+}
+
+.tarjeta-preview__contacto-item {
+  display: flex; gap: var(--space-xs); align-items: center;
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+}
+
+/* Perfil público: header a todo ancho con fondo degradado.
+   Incluye avatar + nombre + cargo + íconos de redes; estos últimos
+   se pintan a medias fuera del degradado (margin-bottom negativo)
+   para que la zona de color llegue hasta la mitad de los íconos,
+   igual que en la vista previa del wizard/dashboard. */
+.perfil-header {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  padding: var(--space-xl) 0 var(--space-md);
+  color: var(--color-on-primary);
+  text-align: center;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.perfil-header .perfil-avatar {
+  margin: 0 auto var(--space-sm);
+}
+
+.perfil-header .tarjeta-preview__redes {
+  margin: var(--space-md) 0 -19px;
+}
+
+/* Botones de acción del perfil público (Guardar contacto / WhatsApp):
+   siempre neutros (fondo claro, texto oscuro) para garantizar
+   legibilidad sin importar la paleta libre que elija el usuario. */
+.btn-perfil-accion {
+  background: #fff;
+  color: var(--gray-900);
+  border: 1.5px solid var(--color-border);
+}
+.btn-perfil-accion:hover { background: var(--gray-100); }
+
+.perfil-galeria {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xs);
+}
+
+.perfil-galeria img {
+  border-radius: var(--radius-sm);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.perfil-video {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.perfil-video iframe { width: 100%; height: 100%; border: 0; }

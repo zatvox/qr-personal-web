@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi panel | QR Personal System</title>
+<link rel="icon" type="image/svg+xml" href="../assets/images/logo.svg">
+<link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+
+<header class="container">
+  <nav class="navbar">
+    <a class="navbar__logo" href="../index.html"><img src="../assets/images/logo.svg" alt="" width="32" height="32"> QR Personal System</a>
+    <div style="display:flex; gap: 8px;">
+      <a class="btn btn-secondary" id="link-ver-perfil" href="#" target="_blank" rel="noopener">Ver mi página</a>
+      <button class="btn btn-tertiary" id="btn-logout">Cerrar sesión</button>
+    </div>
+  </nav>
+</header>
+
+<main class="container" style="padding-bottom: var(--space-xl);">
+  <div id="estado-carga" class="estado-mensaje"><span class="spinner"></span><p>Cargando tu panel...</p></div>
+
+  <div id="dashboard-contenido" style="display:none;">
+    <div class="wizard-layout">
+
+      <!-- ================= FORMULARIO DE EDICIÓN ================= -->
+      <div>
+        <h1>Edita tu tarjeta</h1>
+
+        <form id="form-dashboard" novalidate>
+
+          <!-- Diseño -->
+          <details class="accordion-section" data-seccion="diseno">
+            <summary>
+              <span class="accordion-section__icono">🎨</span>
+              <span class="accordion-section__texto">
+                <div>Diseño</div>
+                <div class="accordion-section__hint">Tema de color de tu página pública</div>
+              </span>
+              <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </summary>
+            <div class="accordion-section__body">
+              <p class="paleta-picker__label">Paleta de colores</p>
+              <div class="paleta-swatches" id="paleta-swatches"></div>
+
+              <div class="paleta-editor">
+                <div class="form-group">
+                  <label class="form-label" for="color-primario-hex">Color primario</label>
+                  <div class="color-input-wrap">
+                    <input type="color" id="color-primario-picker" aria-label="Selector de color primario">
+                    <input type="text" id="color-primario-hex" maxlength="7" placeholder="#RRGGBB">
+                  </div>
+                </div>
+
+                <button type="button" class="btn-swap-colores" id="btn-swap-colores" aria-label="Intercambiar colores">⇄</button>
+
+                <div class="form-group">
+                  <label class="form-label" for="color-secundario-hex">Color secundario</label>
+                  <div class="color-input-wrap">
+                    <input type="color" id="color-secundario-picker" aria-label="Selector de color secundario">
+                    <input type="text" id="color-secundario-hex" maxlength="7" placeholder="#RRGGBB">
+                  </div>
+                </div>
+              </div>
+
+              <div class="fuentes-picker">
+                <p class="paleta-picker__label">Fuentes</p>
+                <div class="fuentes-grid">
+                  <div class="form-group">
+                    <label class="form-label" for="fuente-titulo">Título</label>
+                    <select class="form-select" id="fuente-titulo"></select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="fuente-texto">Textos</label>
+                    <select class="form-select" id="fuente-texto"></select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Datos básicos -->
+          <details class="accordion-section" data-seccion="personal" open>
+            <summary>
+              <span class="accordion-section__icono">👤</span>
+              <span class="accordion-section__texto">
+                <div>Datos básicos</div>
+                <div class="accordion-section__hint">Nombre, foto, cargo y descripción</div>
+              </span>
+              <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </summary>
+            <div class="accordion-section__body">
+              <div class="form-group">
+                <label class="form-label" for="avatar-file">Foto de perfil</label>
+                <input class="form-input" type="file" id="avatar-file" accept="image/png, image/jpeg, image/webp">
+                <p class="form-hint">JPG, PNG o WEBP, máx. 3MB. Se optimiza automáticamente.</p>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="nombre_completo">Nombre completo *</label>
+                <input class="form-input" type="text" id="nombre_completo" required maxlength="100">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="cargo">Cargo / profesión</label>
+                <input class="form-input" type="text" id="cargo" maxlength="100">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="empresa">Empresa / negocio</label>
+                <input class="form-input" type="text" id="empresa" maxlength="100">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="bio">Descripción breve</label>
+                <textarea class="form-textarea" id="bio" maxlength="280"></textarea>
+              </div>
+            </div>
+          </details>
+
+          <!-- Contacto -->
+          <details class="accordion-section" data-seccion="contacto">
+            <summary>
+              <span class="accordion-section__icono">☎️</span>
+              <span class="accordion-section__texto">
+                <div>Contacto</div>
+                <div class="accordion-section__hint">Teléfono, WhatsApp y dirección</div>
+              </span>
+              <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </summary>
+            <div class="accordion-section__body">
+              <div class="form-group">
+                <label class="form-label" for="telefono">Teléfono</label>
+                <input class="form-input" type="tel" id="telefono">
+              </div>
+
+              <div class="form-group form-check">
+                <input type="checkbox" id="es_whatsapp">
+                <label class="form-label" for="es_whatsapp" style="margin:0;">Este número también es mi WhatsApp</label>
+              </div>
+
+              <div class="form-group" id="whatsapp-wrap" style="display:none;">
+                <label class="form-label" for="whatsapp">Número de WhatsApp</label>
+                <input class="form-input" type="tel" id="whatsapp">
+                <p class="form-hint">Ingresa el número solo si es distinto al de llamadas.</p>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="direccion">Dirección</label>
+                <input class="form-input" type="text" id="direccion" maxlength="150">
+              </div>
+              <div class="form-group form-check">
+                <input type="checkbox" id="mostrar_email">
+                <label class="form-label" for="mostrar_email" style="margin:0;">Mostrar mi email en la tarjeta pública</label>
+              </div>
+            </div>
+          </details>
+
+          <!-- Redes sociales -->
+          <details class="accordion-section" data-seccion="redes">
+            <summary>
+              <span class="accordion-section__icono">🌐</span>
+              <span class="accordion-section__texto">
+                <div>Redes sociales</div>
+                <div class="accordion-section__hint">Enlaces a tus redes</div>
+              </span>
+              <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </summary>
+            <div class="accordion-section__body">
+              <div id="redes-campos"></div>
+            </div>
+          </details>
+
+          <!-- Extras + slug -->
+          <details class="accordion-section" data-seccion="extras">
+            <summary>
+              <span class="accordion-section__icono">✨</span>
+              <span class="accordion-section__texto">
+                <div>Extras y tu link</div>
+                <div class="accordion-section__hint">Horario, video y tu link único</div>
+              </span>
+              <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </summary>
+            <div class="accordion-section__body">
+              <div class="form-group">
+                <label class="form-label" for="horario_atencion">Horario de atención</label>
+                <input class="form-input" type="text" id="horario_atencion" maxlength="100">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="video_url">Video (YouTube/Vimeo)</label>
+                <input class="form-input" type="url" id="video_url">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="slug">Tu link único</label>
+                <div class="slug-input-wrap">
+                  <span id="slug-prefijo">tusitio.com/u/</span>
+                  <input class="form-input" type="text" id="slug" minlength="3" maxlength="40" disabled>
+                </div>
+                <p class="form-hint">El link ya fue asignado al confirmar tu cuenta y no puede cambiarse aquí para no romper tu QR ya compartido. Escríbenos si necesitas cambiarlo.</p>
+              </div>
+            </div>
+          </details>
+
+          <!-- Galería -->
+          <details class="accordion-section" data-seccion="galeria">
+            <summary>
+              <span class="accordion-section__icono">🖼️</span>
+              <span class="accordion-section__texto">
+                <div>Galería de fotos</div>
+                <div class="accordion-section__hint" id="galeria-contador">0 de 6 fotos usadas</div>
+              </span>
+              <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </summary>
+            <div class="accordion-section__body">
+              <div class="perfil-galeria" id="galeria-grid" style="margin-bottom: var(--space-sm);"></div>
+              <div class="form-group">
+                <label class="form-label" for="galeria-file">Agregar fotos</label>
+                <input class="form-input" type="file" id="galeria-file" accept="image/png, image/jpeg, image/webp" multiple>
+                <p class="form-hint">Se comprimen automáticamente al subirlas para no gastar tu cuota gratuita. Máx. 6 fotos.</p>
+              </div>
+              <div id="galeria-error" class="form-error" role="alert" style="display:none;"></div>
+            </div>
+          </details>
+
+          <!-- Visibilidad -->
+          <details class="accordion-section" data-seccion="visibilidad">
+            <summary>
+              <span class="accordion-section__icono">👁️</span>
+              <span class="accordion-section__texto">
+                <div>Visibilidad</div>
+                <div class="accordion-section__hint">Publicar o pausar tu tarjeta</div>
+              </span>
+              <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </summary>
+            <div class="accordion-section__body">
+              <div class="form-group form-check">
+                <input type="checkbox" id="activo">
+                <label class="form-label" for="activo" style="margin:0;">Mi perfil está publicado (visible para el público)</label>
+              </div>
+            </div>
+          </details>
+
+          <div class="card" style="margin-top: var(--space-md);">
+            <div id="guardar-error" class="form-error" role="alert" style="display:none;"></div>
+            <div id="guardar-exito" class="form-success" role="status" style="display:none;"></div>
+            <button type="submit" class="btn btn-primary btn-block">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ================= PREVIEW + QR ================= -->
+      <aside>
+        <div class="tarjeta-preview" style="margin-bottom: var(--space-md);">
+          <div class="tarjeta-preview__header" id="preview-header">
+            <img class="tarjeta-preview__avatar" id="preview-avatar" src="" alt="">
+            <h3 class="tarjeta-preview__nombre" id="preview-nombre"></h3>
+            <p class="tarjeta-preview__cargo" id="preview-cargo"></p>
+            <div class="tarjeta-preview__redes" id="preview-redes"></div>
+          </div>
+          <div class="tarjeta-preview__body">
+            <p class="tarjeta-preview__bio" id="preview-bio"></p>
+          </div>
+        </div>
+
+        <div class="card" style="text-align:center;">
+          <h2>Tu código QR</h2>
+          <div id="qr-contenedor" style="display:flex; justify-content:center; margin: var(--space-md) 0;"></div>
+          <p class="form-hint" id="qr-link"></p>
+          <button class="btn btn-secondary btn-block" id="btn-descargar-qr" style="margin-top: var(--space-sm);">Descargar QR</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="../assets/js/dashboard.js"></script>
+</body>
+</html>

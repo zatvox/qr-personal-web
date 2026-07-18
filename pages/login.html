@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iniciar sesión | QR Personal System</title>
+<link rel="icon" type="image/svg+xml" href="../assets/images/logo.svg">
+<link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+
+<header class="container">
+  <nav class="navbar">
+    <a class="navbar__logo" href="../index.html"><img src="../assets/images/logo.svg" alt="" width="32" height="32"> QR Personal System</a>
+    <a class="btn btn-tertiary" href="../index.html">Crear tarjeta nueva</a>
+  </nav>
+</header>
+
+<main class="container" style="max-width: 440px; padding-top: var(--space-xl);">
+  <div class="card">
+    <h1 style="font-size:1.5rem;">Inicia sesión</h1>
+    <p id="mensaje-confirmacion" class="form-success" style="display:none;">
+      ¡Correo confirmado! Ya puedes iniciar sesión.
+    </p>
+
+    <form id="form-login" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="email">Correo electrónico</label>
+        <input class="form-input" type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Contraseña</label>
+        <input class="form-input" type="password" id="password" name="password" required>
+      </div>
+
+      <div id="login-error" class="form-error" role="alert" style="display:none;"></div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="btn-login">Entrar</button>
+    </form>
+
+    <p style="margin-top: var(--space-md); text-align:center; font-size: 0.9rem;">
+      <a href="olvide-password.html">¿Olvidaste tu contraseña?</a>
+    </p>
+    <p style="text-align:center; font-size: 0.9rem;">
+      ¿No tienes cuenta? <a href="../index.html">Crea tu tarjeta gratis</a>
+    </p>
+    <p style="text-align:center;">
+      <button type="button" class="btn btn-tertiary" id="btn-reenviar" style="display:none;">Reenviar correo de confirmación</button>
+    </p>
+  </div>
+</main>
+
+<script type="module" src="../assets/js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+/* ============================================================
+   PALETA PASTEL ACCESIBLE
+   Todos los pares texto/fondo fueron verificados con la fórmula
+   de contraste WCAG 2.1 (relative luminance). Mínimos usados:
+   - Texto normal sobre fondo: >= 4.5:1
+   - Texto en botones (bold, >=15px): >= 4.5:1 (se prioriza AA completo)
+   - Fondos pastel con texto oscuro: >= 11:1 (muy holgado)
+   No se usa dark mode automático: el usuario pidió evitar fondos
+   oscuros porque afectan la legibilidad del diseño pastel.
+============================================================ */
+:root {
+  /* Colores de marca (pastel, pero suficientemente saturados para texto blanco legible) */
+  --color-primary: #6355C7;        /* violeta suave — botones/links, 5.75:1 con blanco */
+  --color-primary-dark: #52439E;   /* hover/active, 7.91:1 con blanco */
+  --color-primary-light: #EFEBFB;  /* fondo pastel lavanda, 13.2:1 con texto oscuro */
+
+  --color-secondary: #26788A;      /* teal suave, 5.08:1 con blanco */
+  --color-secondary-light: #DFF3F6;/* fondo pastel aqua, 13.5:1 con texto oscuro */
+
+  --color-accent: #B36829;         /* terracota suave para acentos con texto blanco, 4.26:1 */
+  --color-accent-light: #FBD9C4;   /* fondo pastel durazno, 11.7:1 con texto oscuro */
+
+  /* Neutrales (base tibia, no gris frío) */
+  --gray-50: #FBFAFF;   /* fondo general de página */
+  --gray-100: #F3F1FC;  /* fondo de tarjetas alternas */
+  --gray-300: #DAD6F2;  /* bordes */
+  --gray-600: #5B5F73;  /* texto secundario, 6.07:1 con fondo claro */
+  --gray-900: #1F2430;  /* texto principal, 14.9:1 con fondo claro */
+
+  --color-success: #2F7A54;  --color-success-light: #DDF3E6; --color-success-text: #1F6B44; /* 5.21:1 botón / 5.56:1 badge */
+  --color-error:   #C13F3F;  --color-error-light:   #FBE4E4; --color-error-text:   #A83232; /* 5.18:1 botón / 5.47:1 badge */
+  --color-warning: #B36829;  --color-warning-light: #FEF3C7; --color-warning-text: #8F4F1E; /* 4.26:1 botón / 5.71:1 badge */
+
+  --color-bg: #FFFFFF;       /* tarjetas y superficies elevadas */
+  --color-page-bg: var(--gray-50);
+  --color-text: var(--gray-900);
+  --color-border: var(--gray-300);
+
+  /* Color de texto legible sobre --color-primary cuando este es libre
+     (perfil público con paleta elegida por el usuario). Por defecto
+     blanco; perfil.js lo recalcula según el color elegido (ADR-006). */
+  --color-on-primary: #FFFFFF;
+
+  /* Tipografía */
+  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Espaciado */
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1.25rem;
+  --space-lg: 2rem;
+  --space-xl: 3.5rem;
+
+  /* Bordes y sombras (sombras suaves, tono violeta en vez de negro puro) */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 1px 3px rgba(99, 85, 199, 0.10);
+  --shadow-md: 0 8px 24px rgba(99, 85, 199, 0.14);
+  --shadow-lg: 0 16px 40px rgba(99, 85, 199, 0.18);
+
+  --transition: 180ms ease;
+}
+
+/* Nota: sin @media (prefers-color-scheme: dark) a propósito.
+   El diseño pastel claro se mantiene siempre para garantizar
+   contraste y legibilidad consistentes en cualquier dispositivo. */

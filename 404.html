@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Redirigiendo...</title>
+<script>
+  // ============================================================
+  // Trick de "URLs bonitas" para GitHub Pages (ADR-003).
+  // GitHub Pages no soporta rutas del lado servidor: cualquier
+  // URL que no coincida con un archivo real (ej. /u/mi-slug)
+  // cae aquí. Redirigimos a pages/perfil.html?u=mi-slug
+  // conservando el slug original.
+  //
+  // Configurado para repo de proyecto (usuario.github.io/nombre-repo/),
+  // que es el caso confirmado para este sitio: PATH_SEGMENTS_TO_KEEP = 1
+  // conserva el segmento "/nombre-repo" al redirigir.
+  // Si en el futuro migras a dominio propio o a un repo de usuario
+  // (usuario.github.io raíz), cambia este valor a 0.
+  // ============================================================
+  (function () {
+    var PATH_SEGMENTS_TO_KEEP = 1;
+
+    var l = window.location;
+    var segmentosBase = l.pathname.split('/').slice(0, 1 + PATH_SEGMENTS_TO_KEEP).join('/');
+    var resto = l.pathname.slice(segmentosBase.length).split('/').filter(Boolean);
+
+    // Esperado: resto = ['u', 'slug-del-usuario']
+    if (resto[0] === 'u' && resto[1]) {
+      var slug = resto[1];
+      l.replace(
+        segmentosBase + '/pages/perfil.html?u=' + encodeURIComponent(slug) +
+        (l.search ? l.search.replace('?', '&') : '') + l.hash
+      );
+    } else {
+      // Ruta desconocida que no es /u/slug: volver al inicio
+      l.replace(segmentosBase + '/index.html');
+    }
+  })();
+</script>
+</head>
+<body>
+  <p>Redirigiendo, un momento...</p>
+</body>
+</html>
