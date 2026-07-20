@@ -182,9 +182,24 @@
             </summary>
             <div class="accordion-section__body">
               <div class="form-group">
-                <label class="form-label" for="horario_atencion">Horario de atención</label>
-                <input class="form-input" type="text" id="horario_atencion" maxlength="100">
+                <label class="form-label">Días de atención</label>
+                <div class="dias-semana-picker" id="dias-semana-picker"><!-- generado por dashboard.js desde CONFIG.DIAS_SEMANA --></div>
               </div>
+              <div class="horario-rango">
+                <div class="form-group">
+                  <label class="form-label" for="hora-desde">Desde</label>
+                  <input class="form-input" type="time" id="hora-desde">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="hora-hasta">Hasta</label>
+                  <input class="form-input" type="time" id="hora-hasta">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="duracion-cita">Duración de cita</label>
+                  <select class="form-select" id="duracion-cita"></select>
+                </div>
+              </div>
+              <p class="form-hint" id="horario-resumen" style="margin-bottom: var(--space-md);"></p>
               <div class="form-group">
                 <label class="form-label" for="video_url">Video (YouTube/Vimeo)</label>
                 <input class="form-input" type="url" id="video_url">
@@ -237,6 +252,26 @@
                 <input type="checkbox" id="activo">
                 <label class="form-label" for="activo" style="margin:0;">Mi perfil está publicado (visible para el público)</label>
               </div>
+              <div class="form-group form-check">
+                <input type="checkbox" id="permitir_citas">
+                <label class="form-label" for="permitir_citas" style="margin:0;">Permitir que me agenden citas (muestra el botón "Agendar una cita" en tu tarjeta pública)</label>
+              </div>
+              <p class="form-hint">Necesitas configurar días y horario de atención en "Extras y tu link" para que alguien pueda agendar.</p>
+            </div>
+          </details>
+
+          <!-- Citas recibidas -->
+          <details class="accordion-section" data-seccion="citas">
+            <summary>
+              <span class="accordion-section__icono">📅</span>
+              <span class="accordion-section__texto">
+                <div>Citas</div>
+                <div class="accordion-section__hint" id="citas-contador">Sin citas agendadas</div>
+              </span>
+              <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </summary>
+            <div class="accordion-section__body">
+              <div id="citas-lista"></div>
             </div>
           </details>
 

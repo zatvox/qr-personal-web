@@ -378,6 +378,12 @@ Se define constantes editables en `assets/js/config.js` (no hay panel de "negoci
 - Alternativas descartadas: exigir login antes de elegir foto (rompe el flujo "wizard primero, cuenta al final" pedido explícitamente); guardar el archivo original completo en `user_metadata` (infla el JWT de sesión en cada request, mal para rendimiento).
 - Consecuencias: (+) el usuario ve su foto en el preview desde el wizard sin fricción. (−) la foto importada automáticamente es de baja resolución (miniatura); se anima al usuario a subir una versión de mejor calidad desde el dashboard (ya soportado).
 
+**ADR-009 — Módulo de citas (horario estructurado + agendamiento público)**
+- Contexto: el campo `horario_atencion` era texto libre, imposible de usar para generar bloques reservables. Se pidió un módulo tipo "agendar una cita" con calendario en el perfil público.
+- Decisión: `horario_atencion` se reemplaza por campos estructurados (`dias_atencion text[]`, `hora_desde_atencion`/`hora_hasta_atencion time`, `duracion_cita_min`) + un interruptor independiente `permitir_citas` en "Visibilidad". Nueva tabla `citas` (RLS: solo el dueño la lee). Toda escritura pasa por la RPC `public.crear_cita()` (`SECURITY DEFINER`), que revalida en el servidor horario/duplicados en vez de confiar solo en el JS del cliente — el visitante nunca tiene INSERT directo a la tabla. `obtener_horarios_ocupados()` es una RPC pública que solo expone la hora (nunca datos personales de otros solicitantes), usada para deshabilitar slots ya tomados en el calendario. Notificación por email opcional vía EmailJS (100% cliente, sin backend propio, capa gratuita ~200 emails/mes) — si no se configura, la cita igual queda guardada y visible en el dashboard.
+- Alternativas descartadas: dejar la inserción de citas abierta directo a la tabla vía RLS pública (más simple, pero duplica la lógica de validación en cliente y servidor de forma menos auditable que una sola RPC); usar un backend propio o Supabase Edge Functions para el email (rompe "100% gratis sin infraestructura propia" para este proyecto).
+- Consecuencias: (+) agendamiento sin choques de horario, sin exponer datos de otros solicitantes, sin backend propio. (−) la notificación por email depende de una cuenta externa gratuita opcional (EmailJS) que cada usuario debe configurar si la quiere.
+
 ---
 
 ## ✅ Cierre

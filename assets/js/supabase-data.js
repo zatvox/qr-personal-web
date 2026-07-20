@@ -134,3 +134,54 @@ export async function eliminarFotoGaleria(id, storagePath) {
   const { error } = await supabase.from('gallery_images').delete().eq('id', id);
   if (error) throw error;
 }
+
+// ------------------------------------------------------------
+// Módulo de citas ("Agendar una cita")
+// ------------------------------------------------------------
+
+/** Horas ya reservadas de un perfil (por slug) en una fecha dada, vía RPC pública */
+export async function obtenerHorariosOcupados(slug, fechaISO) {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase.rpc('obtener_horarios_ocupados', { p_slug: slug, p_fecha: fechaISO });
+  if (error) throw error;
+  return (data || []).map(row => row.hora.slice(0, 5)); // "HH:MM:SS" -> "HH:MM"
+}
+
+/**
+ * Crea una cita vía RPC segura (valida horario/duplicados en el
+ * servidor, ver functions.sql -> crear_cita). Lanza error con mensaje
+ * legible si el horario ya no está disponible o los datos son inválidos.
+ */
+export async function crearCita({ slug, nombre, email, descripcion, fecha, hora }) {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase.rpc('crear_cita', {
+    p_slug: slug,
+    p_nombre: nombre,
+    p_email: email,
+    p_descripcion: descripcion || '',
+    p_fecha: fecha,
+    p_hora: hora,
+  });
+  if (error) throw error;
+  return data;
+}
+
+/** Lista las citas recibidas por el dueño del perfil (dashboard), más próximas primero */
+export async function obtenerCitas(profileId) {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase
+    .from('citas')
+    .select('*')
+    .eq('profile_id', profileId)
+    .order('fecha', { ascending: true })
+    .order('hora', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+/** Borra una cita recibida (el dueño la descarta desde el dashboard) */
+export async function eliminarCita(id) {
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase.from('citas').delete().eq('id', id);
+  if (error) throw error;
+}

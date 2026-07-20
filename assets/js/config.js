@@ -87,4 +87,32 @@ export const CONFIG = {
   // Buckets de Storage
   BUCKET_AVATARS: 'avatars',
   BUCKET_GALLERY: 'gallery',
+
+  // Días de la semana para el horario de atención / módulo de citas.
+  // "valor" debe coincidir exactamente con el CHECK dias_atencion_validos
+  // de la DB y con los nombres usados en la función crear_cita().
+  DIAS_SEMANA: [
+    { valor: 'lunes', label: 'Lun' },
+    { valor: 'martes', label: 'Mar' },
+    { valor: 'miercoles', label: 'Mié' },
+    { valor: 'jueves', label: 'Jue' },
+    { valor: 'viernes', label: 'Vie' },
+    { valor: 'sabado', label: 'Sáb' },
+    { valor: 'domingo', label: 'Dom' },
+  ],
+  DURACION_CITA_DEFECTO: 30,
+  DURACIONES_CITA_DISPONIBLES: [15, 30, 45, 60, 90, 120],
+
+  // EmailJS (https://www.emailjs.com) — envía un correo al dueño del
+  // perfil cuando alguien agenda una cita, 100% desde el navegador del
+  // visitante (sin backend propio). Plan gratuito: ~200 emails/mes.
+  // Deja estos 3 campos vacíos si no quieres activar la notificación
+  // por correo; el módulo de citas funciona igual (la cita queda
+  // guardada y visible en el dashboard), solo no se envía el aviso.
+  // Pasos: crea cuenta gratis en emailjs.com -> Email Service -> Email
+  // Template (variables sugeridas: to_email, nombre_perfil, nombre_solicitante,
+  // email_solicitante, fecha, hora, descripcion) -> copia aquí tus IDs.
+  EMAILJS_PUBLIC_KEY: '',
+  EMAILJS_SERVICE_ID: '',
+  EMAILJS_TEMPLATE_ID: '',
 };

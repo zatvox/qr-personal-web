@@ -44,16 +44,35 @@ export async function renderizarQR(contenedor, texto, opciones = {}) {
   }
 }
 
-/** Descarga la imagen del QR ya renderizado dentro del contenedor */
+/**
+ * Descarga la imagen del QR ya renderizado dentro del contenedor.
+ * Se redibuja sobre un canvas nuevo con fondo blanco sólido (+ un
+ * margen de "zona tranquila") en vez de usar directamente el
+ * canvas/img de la librería: así el PNG exportado nunca queda con
+ * fondo transparente, que en muchas apps de galería/impresión se ve
+ * negro o gris y hace que el QR no se pueda escanear.
+ */
 export function descargarQR(contenedorId, nombreArchivo = 'mi-qr.png') {
   const el = document.getElementById(contenedorId);
   const img = el?.querySelector('img');
-  const canvas = el?.querySelector('canvas');
-  const src = img?.src || canvas?.toDataURL('image/png');
-  if (!src) return false;
+  const canvasOriginal = el?.querySelector('canvas');
+  const fuente = img || canvasOriginal;
+  if (!fuente) return false;
+
+  const ladoQR = fuente.naturalWidth || fuente.width || 220;
+  const margen = Math.round(ladoQR * 0.12); // zona tranquila blanca alrededor del QR
+  const ladoFinal = ladoQR + margen * 2;
+
+  const canvasFinal = document.createElement('canvas');
+  canvasFinal.width = ladoFinal;
+  canvasFinal.height = ladoFinal;
+  const ctx = canvasFinal.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, ladoFinal, ladoFinal);
+  ctx.drawImage(fuente, margen, margen, ladoQR, ladoQR);
 
   const a = document.createElement('a');
-  a.href = src;
+  a.href = canvasFinal.toDataURL('image/png');
   a.download = nombreArchivo;
   document.body.appendChild(a);
   a.click();

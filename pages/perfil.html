@@ -32,6 +32,7 @@
       <img id="p-avatar" class="perfil-avatar" src="" alt="">
       <h1 id="p-nombre" style="color: var(--color-on-primary);"></h1>
       <p id="p-cargo" style="color: var(--color-on-primary); opacity:0.85;"></p>
+      <button type="button" class="btn btn-agendar-cita" id="btn-agendar-cita" style="display:none;">📅 Agendar una cita</button>
       <div class="tarjeta-preview__redes" id="p-redes"></div>
     </div>
     <svg class="tarjeta-preview__ola" viewBox="0 0 500 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0,12 C125,24 375,0 500,12 L500,24 L0,24 Z" style="fill:var(--color-bg)"></path></svg>
@@ -76,6 +77,63 @@
 <div class="lightbox" id="lightbox" aria-hidden="true">
   <button type="button" class="lightbox__cerrar" id="lightbox-cerrar" aria-label="Cerrar imagen">&times;</button>
   <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- Modal "Agendar una cita": calendario -> horarios -> formulario -> confirmación -->
+<div class="cita-modal" id="cita-modal" aria-hidden="true">
+  <div class="cita-modal__caja" role="dialog" aria-modal="true" aria-labelledby="cita-modal-titulo">
+    <button type="button" class="lightbox__cerrar" id="cita-modal-cerrar" aria-label="Cerrar">&times;</button>
+    <h2 id="cita-modal-titulo">Agendar una cita</h2>
+
+    <!-- Paso 1: calendario mensual -->
+    <div id="cita-paso-calendario">
+      <div class="cita-calendario__nav">
+        <button type="button" class="btn btn-tertiary" id="cita-mes-anterior" aria-label="Mes anterior">‹</button>
+        <span id="cita-mes-actual"></span>
+        <button type="button" class="btn btn-tertiary" id="cita-mes-siguiente" aria-label="Mes siguiente">›</button>
+      </div>
+      <div class="cita-calendario__dias-semana" id="cita-dias-semana"></div>
+      <div class="cita-calendario__grid" id="cita-calendario-grid"></div>
+    </div>
+
+    <!-- Paso 2: horarios disponibles del día elegido -->
+    <div id="cita-paso-horarios" style="display:none;">
+      <button type="button" class="cita-volver" data-volver="calendario">‹ Elegir otro día</button>
+      <p class="cita-fecha-elegida" id="cita-fecha-elegida"></p>
+      <div class="cita-horarios-grid" id="cita-horarios-grid"></div>
+      <p class="form-hint" id="cita-sin-horarios" style="display:none;">No quedan horarios disponibles ese día. Elige otra fecha.</p>
+    </div>
+
+    <!-- Paso 3: formulario de datos -->
+    <div id="cita-paso-formulario" style="display:none;">
+      <button type="button" class="cita-volver" data-volver="horarios">‹ Elegir otro horario</button>
+      <p class="cita-fecha-elegida" id="cita-resumen-elegido"></p>
+      <form id="form-cita">
+        <div class="form-group">
+          <label class="form-label" for="cita-nombre">Tu nombre *</label>
+          <input class="form-input" type="text" id="cita-nombre" required maxlength="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cita-email">Tu correo *</label>
+          <input class="form-input" type="email" id="cita-email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cita-descripcion">Motivo de la cita (opcional)</label>
+          <textarea class="form-textarea" id="cita-descripcion" maxlength="300"></textarea>
+        </div>
+        <div id="cita-error" class="form-error" role="alert" style="display:none;"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="btn-confirmar-cita">Confirmar cita</button>
+      </form>
+    </div>
+
+    <!-- Paso 4: confirmación -->
+    <div id="cita-paso-confirmacion" style="display:none; text-align:center;">
+      <p style="font-size:2.5rem; margin:0;">✅</p>
+      <h3>¡Cita agendada!</h3>
+      <p class="form-hint" id="cita-confirmacion-detalle"></p>
+      <button type="button" class="btn btn-primary" id="btn-cerrar-confirmacion">Listo</button>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="../assets/js/perfil.js"></script>

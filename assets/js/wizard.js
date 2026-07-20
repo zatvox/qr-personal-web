@@ -17,7 +17,7 @@ import {
 } from './utils.js';
 
 const form = document.getElementById('wizard-form');
-const camposTexto = ['nombre_completo', 'cargo', 'empresa', 'bio', 'telefono', 'whatsapp', 'direccion', 'horario_atencion', 'video_url', 'slug', 'email'];
+const camposTexto = ['nombre_completo', 'cargo', 'empresa', 'bio', 'telefono', 'whatsapp', 'direccion', 'video_url', 'slug', 'email'];
 
 let avatarPendienteB64 = ''; // miniatura del avatar elegido, lista para enviar en el registro
 let colorPrimario = CONFIG.TEMA_PRIMARIO_DEFECTO;
@@ -298,7 +298,6 @@ function actualizarPreview() {
   if (d.telefono) items.push(fila('telefono', 'Teléfono', d.telefono));
   if (!d.es_whatsapp && d.whatsapp) items.push(fila('whatsapp', 'WhatsApp', d.whatsapp));
   if (d.direccion) items.push(fila('direccion', 'Ubicación', d.direccion));
-  if (d.horario_atencion) items.push(fila('horario', 'Horario', d.horario_atencion));
   contactoCont.innerHTML = items.join('') || '<p class="tarjeta-preview__contacto-vacio">Tus datos de contacto aparecerán aquí.</p>';
 }
 

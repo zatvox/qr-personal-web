@@ -227,6 +227,49 @@ table.data-table th, table.data-table td {
 .galeria-item__borrar:hover { background: #fff; }
 .galeria-item__estado { min-height: 1.2em; }
 
+/* Horario de atención (dashboard/perfil): selector de días + rango horario */
+.dias-semana-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+.dia-semana-chip {
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--gray-700);
+  border-radius: var(--radius-lg);
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dia-semana-chip.seleccionado {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.horario-rango {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-sm);
+}
+
+/* Lista de citas recibidas (dashboard) */
+.cita-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.cita-item:last-child { border-bottom: none; }
+.cita-item__fecha { font-weight: 700; color: var(--gray-900); font-size: 0.9rem; white-space: nowrap; }
+.cita-item__detalle { flex: 1; min-width: 0; }
+.cita-item__nombre { font-weight: 600; color: var(--gray-900); }
+.cita-item__email { font-size: 0.85rem; color: var(--gray-600); overflow-wrap: anywhere; }
+.cita-item__desc { font-size: 0.85rem; color: var(--gray-600); margin-top: 2px; }
+.cita-item__borrar {
+  border: none; background: none; color: var(--color-error-text);
+  cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 4px;
+}
+
 /* ------------------------------------------------------------
    Acordeón de secciones (wizard/dashboard), estilo qr-code.io
    Implementado con <details>/<summary> nativos: accesible por

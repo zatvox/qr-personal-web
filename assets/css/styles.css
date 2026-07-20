@@ -409,6 +409,113 @@ a.tarjeta-preview__contacto-valor:hover { text-decoration: underline; }
   .lightbox, .lightbox img { transition: none; }
 }
 
+/* ------------------------------------------------------------
+   Módulo "Agendar una cita" (perfil público)
+------------------------------------------------------------ */
+.btn-agendar-cita {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--space-sm) 0;
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.6);
+  color: var(--color-on-primary, #fff);
+  border-radius: var(--radius-lg);
+  padding: 8px 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.btn-agendar-cita:hover { background: rgba(255,255,255,0.28); }
+
+.cita-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  background: rgba(15, 15, 20, 0.6);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+.cita-modal--visible { opacity: 1; visibility: visible; }
+
+.cita-modal__caja {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-lg);
+}
+
+.cita-calendario__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+  font-weight: 600;
+}
+
+.cita-calendario__dias-semana,
+.cita-calendario__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+.cita-calendario__dias-semana span {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  padding: 4px 0;
+}
+
+.cita-dia {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  color: var(--gray-800);
+  cursor: pointer;
+}
+.cita-dia:disabled { color: var(--gray-300); cursor: default; }
+.cita-dia.cita-dia--vacio { visibility: hidden; }
+.cita-dia:not(:disabled):hover { background: var(--gray-100); }
+.cita-dia.cita-dia--hoy { font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--color-primary); }
+
+.cita-volver {
+  border: none; background: none; color: var(--color-primary);
+  font-weight: 600; cursor: pointer; padding: 0; margin-bottom: var(--space-sm);
+}
+
+.cita-fecha-elegida { font-weight: 600; color: var(--gray-900); margin-bottom: var(--space-sm); }
+
+.cita-horarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+.cita-horario-slot {
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: 8px 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.cita-horario-slot:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
 .perfil-video {
   aspect-ratio: 16 / 9;
   width: 100%;

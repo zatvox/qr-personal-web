@@ -6,12 +6,13 @@ import { protegerPagina, cerrarSesion } from './auth.js';
 import {
   obtenerMiPerfil, actualizarPerfil, subirAvatar,
   obtenerGaleria, agregarFotoGaleria, eliminarFotoGaleria, actualizarFotoGaleria,
+  obtenerCitas, eliminarCita,
 } from './supabase-data.js';
 import { renderizarQR, descargarQR } from './qr.js';
-import { escapeHtml, comprimirImagen, base64ADataBlob, esHexValido, mezclarConBlanco, iconoRedSocial, iconoContacto, cargarGoogleFont, colorTextoLegible, debounce } from './utils.js';
+import { escapeHtml, comprimirImagen, base64ADataBlob, esHexValido, mezclarConBlanco, iconoRedSocial, iconoContacto, cargarGoogleFont, colorTextoLegible, debounce, formatearHorarioAtencion, formatearHora12h } from './utils.js';
 import { getSupabaseClient } from './supabase-client.js';
 
-const CAMPOS_TEXTO = ['nombre_completo', 'cargo', 'empresa', 'bio', 'telefono', 'whatsapp', 'direccion', 'horario_atencion', 'video_url'];
+const CAMPOS_TEXTO = ['nombre_completo', 'cargo', 'empresa', 'bio', 'telefono', 'whatsapp', 'direccion', 'video_url'];
 
 let sesion = null;
 let perfilActual = null;
@@ -20,6 +21,7 @@ let colorPrimario = CONFIG.TEMA_PRIMARIO_DEFECTO;
 let colorSecundario = CONFIG.TEMA_SECUNDARIO_DEFECTO;
 let fuenteTitulo = CONFIG.FUENTE_TITULO_DEFECTO;
 let fuenteTexto = CONFIG.FUENTE_TEXTO_DEFECTO;
+let diasAtencionSeleccionados = [];
 
 function renderCamposRedes(redesGuardadas = {}) {
   const cont = document.getElementById('redes-campos');
@@ -151,6 +153,47 @@ function actualizarVisibilidadWhatsapp() {
 }
 checkEsWhatsapp.addEventListener('change', actualizarVisibilidadWhatsapp);
 
+// ------------------------------------------------------------
+// Horario de atención: días (chips) + desde/hasta + duración de cita
+// ------------------------------------------------------------
+const diasSemanaPicker = document.getElementById('dias-semana-picker');
+const inputHoraDesde = document.getElementById('hora-desde');
+const inputHoraHasta = document.getElementById('hora-hasta');
+const selectDuracionCita = document.getElementById('duracion-cita');
+
+function renderDiasSemana() {
+  diasSemanaPicker.innerHTML = CONFIG.DIAS_SEMANA.map(d => `
+    <button type="button" class="dia-semana-chip ${diasAtencionSeleccionados.includes(d.valor) ? 'seleccionado' : ''}" data-dia="${d.valor}">${d.label}</button>
+  `).join('');
+  diasSemanaPicker.querySelectorAll('[data-dia]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dia = btn.dataset.dia;
+      diasAtencionSeleccionados = diasAtencionSeleccionados.includes(dia)
+        ? diasAtencionSeleccionados.filter(d => d !== dia)
+        : [...diasAtencionSeleccionados, dia];
+      renderDiasSemana();
+      actualizarResumenHorario();
+      actualizarPreviewEnVivo();
+    });
+  });
+}
+
+function renderSelectorDuracion() {
+  selectDuracionCita.innerHTML = CONFIG.DURACIONES_CITA_DISPONIBLES
+    .map(min => `<option value="${min}">${min} min</option>`).join('');
+}
+
+function actualizarResumenHorario() {
+  const resumen = document.getElementById('horario-resumen');
+  if (!diasAtencionSeleccionados.length || !inputHoraDesde.value || !inputHoraHasta.value) {
+    resumen.textContent = 'Configura tus días y horario para que el módulo de citas funcione.';
+    return;
+  }
+  const labels = CONFIG.DIAS_SEMANA.filter(d => diasAtencionSeleccionados.includes(d.valor)).map(d => d.label);
+  resumen.textContent = `${labels.join(', ')} · ${inputHoraDesde.value} a ${inputHoraHasta.value} (bloques de ${selectDuracionCita.value} min)`;
+}
+[inputHoraDesde, inputHoraHasta, selectDuracionCita].forEach(el => el.addEventListener('input', actualizarResumenHorario));
+
 function llenarFormulario(perfil) {
   CAMPOS_TEXTO.forEach(id => {
     const el = document.getElementById(id);
@@ -158,7 +201,16 @@ function llenarFormulario(perfil) {
   });
   document.getElementById('mostrar_email').checked = !!perfil.mostrar_email;
   document.getElementById('activo').checked = !!perfil.activo;
+  document.getElementById('permitir_citas').checked = !!perfil.permitir_citas;
   document.getElementById('slug').value = perfil.slug || '';
+
+  diasAtencionSeleccionados = Array.isArray(perfil.dias_atencion) ? [...perfil.dias_atencion] : [];
+  renderDiasSemana();
+  renderSelectorDuracion();
+  inputHoraDesde.value = perfil.hora_desde_atencion ? perfil.hora_desde_atencion.slice(0, 5) : '';
+  inputHoraHasta.value = perfil.hora_hasta_atencion ? perfil.hora_hasta_atencion.slice(0, 5) : '';
+  selectDuracionCita.value = perfil.duracion_cita_min || CONFIG.DURACION_CITA_DEFECTO;
+  actualizarResumenHorario();
 
   // "Es WhatsApp" se considera activo si el teléfono y whatsapp guardados coinciden (o whatsapp está vacío)
   checkEsWhatsapp.checked = !perfil.whatsapp || perfil.whatsapp === perfil.telefono;
@@ -233,7 +285,8 @@ function actualizarPreview(perfil) {
   if (perfil.telefono) items.push(fila('telefono', 'Teléfono', perfil.telefono));
   if (perfil.whatsapp && perfil.whatsapp !== perfil.telefono) items.push(fila('whatsapp', 'WhatsApp', perfil.whatsapp));
   if (perfil.direccion) items.push(fila('direccion', 'Ubicación', perfil.direccion));
-  if (perfil.horario_atencion) items.push(fila('horario', 'Horario', perfil.horario_atencion));
+  const horarioTexto = formatearHorarioAtencion(perfil, CONFIG.DIAS_SEMANA);
+  if (horarioTexto) items.push(fila('horario', 'Horario', horarioTexto));
   contactoCont.innerHTML = items.join('') || '<p class="tarjeta-preview__contacto-vacio">Tus datos de contacto aparecerán aquí.</p>';
 }
 
@@ -241,6 +294,11 @@ function recolectarCambios() {
   const cambios = {};
   CAMPOS_TEXTO.forEach(id => { cambios[id] = document.getElementById(id).value.trim(); });
   cambios.mostrar_email = document.getElementById('mostrar_email').checked;
+  cambios.permitir_citas = document.getElementById('permitir_citas').checked;
+  cambios.dias_atencion = diasAtencionSeleccionados;
+  cambios.hora_desde_atencion = inputHoraDesde.value || null;
+  cambios.hora_hasta_atencion = inputHoraHasta.value || null;
+  cambios.duracion_cita_min = Number(selectDuracionCita.value) || CONFIG.DURACION_CITA_DEFECTO;
   cambios.activo = document.getElementById('activo').checked;
   cambios.tema_color_primario = colorPrimario;
   cambios.tema_color_secundario = colorSecundario;
@@ -393,6 +451,53 @@ document.getElementById('galeria-file').addEventListener('change', async (e) => 
 });
 
 // ------------------------------------------------------------
+// Citas recibidas: lista de solo lectura + botón para descartar
+// ------------------------------------------------------------
+async function cargarCitas() {
+  const lista = document.getElementById('citas-lista');
+  const contador = document.getElementById('citas-contador');
+  try {
+    const citas = await obtenerCitas(perfilActual.id);
+    contador.textContent = citas.length
+      ? `${citas.length} cita${citas.length === 1 ? '' : 's'} agendada${citas.length === 1 ? '' : 's'}`
+      : 'Sin citas agendadas';
+
+    if (!citas.length) {
+      lista.innerHTML = '<p class="form-hint">Todavía no tienes citas agendadas.</p>';
+      return;
+    }
+
+    lista.innerHTML = citas.map(c => `
+      <div class="cita-item" data-id="${c.id}">
+        <div class="cita-item__fecha">${c.fecha}<br>${formatearHora12h(c.hora.slice(0, 5))}</div>
+        <div class="cita-item__detalle">
+          <div class="cita-item__nombre">${escapeHtml(c.nombre_solicitante)}</div>
+          <div class="cita-item__email">${escapeHtml(c.email_solicitante)}</div>
+          ${c.descripcion ? `<div class="cita-item__desc">${escapeHtml(c.descripcion)}</div>` : ''}
+        </div>
+        <button type="button" class="cita-item__borrar" data-borrar-cita="${c.id}" aria-label="Descartar cita" title="Descartar">&times;</button>
+      </div>
+    `).join('');
+
+    lista.querySelectorAll('[data-borrar-cita]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          await eliminarCita(btn.dataset.borrarCita);
+          await cargarCitas();
+        } catch (err) {
+          console.error(err);
+          btn.disabled = false;
+        }
+      });
+    });
+  } catch (err) {
+    console.error(err);
+    lista.innerHTML = '<p class="form-error">No se pudieron cargar tus citas.</p>';
+  }
+}
+
+// ------------------------------------------------------------
 // Avatar elegido durante el wizard (antes de tener cuenta): viaja
 // como miniatura base64 en user_metadata y se sube a Storage en el
 // primer ingreso al dashboard. Ver ADR-007.
@@ -436,6 +541,7 @@ async function init() {
     llenarFormulario(perfilActual);
     galeriaActual = await obtenerGaleria(perfilActual.id);
     renderGaleria();
+    cargarCitas();
     document.getElementById('estado-carga').style.display = 'none';
     document.getElementById('dashboard-contenido').style.display = 'block';
   } catch (err) {

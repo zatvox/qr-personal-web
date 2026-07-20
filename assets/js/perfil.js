@@ -2,9 +2,13 @@
 // PERFIL PÚBLICO (pages/perfil.html?u=slug)
 // ============================================================
 import { CONFIG } from './config.js';
-import { obtenerPerfilPublico, obtenerGaleria } from './supabase-data.js';
+import { obtenerPerfilPublico, obtenerGaleria, obtenerHorariosOcupados, crearCita } from './supabase-data.js';
 import { descargarVcf } from './vcard.js';
-import { escapeHtml, soloDigitos, esHexValido, colorTextoLegible, mezclarConBlanco, iconoRedSocial, iconoContacto, cargarGoogleFont } from './utils.js';
+import {
+  escapeHtml, soloDigitos, esHexValido, colorTextoLegible, mezclarConBlanco,
+  iconoRedSocial, iconoContacto, cargarGoogleFont,
+  formatearHorarioAtencion, generarSlotsHorario, formatearHora12h, enviarNotificacionCita,
+} from './utils.js';
 
 function obtenerSlugDeUrl() {
   const params = new URLSearchParams(window.location.search);
@@ -117,9 +121,17 @@ async function render(perfil) {
   }
 
   // Horario
-  if (perfil.horario_atencion) {
-    document.getElementById('p-horario').textContent = perfil.horario_atencion;
+  const horarioTexto = formatearHorarioAtencion(perfil, CONFIG.DIAS_SEMANA);
+  if (horarioTexto) {
+    document.getElementById('p-horario').textContent = horarioTexto;
     document.getElementById('p-horario-card').style.display = 'block';
+  }
+
+  // Botón "Agendar una cita": solo si el dueño lo activó y configuró horario
+  if (perfil.permitir_citas && perfil.dias_atencion?.length && perfil.hora_desde_atencion && perfil.hora_hasta_atencion) {
+    const btn = document.getElementById('btn-agendar-cita');
+    btn.style.display = 'inline-flex';
+    btn.addEventListener('click', () => abrirModalCita(perfil));
   }
 
   // Galería (mini-portafolio): imagen + título + descripción + enlace opcional
@@ -209,6 +221,204 @@ lightbox.addEventListener('click', (e) => {
 document.getElementById('lightbox-cerrar').addEventListener('click', cerrarLightbox);
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') cerrarLightbox();
+});
+
+// ------------------------------------------------------------
+// Módulo "Agendar una cita": calendario mensual -> horarios
+// disponibles ese día -> formulario -> confirmación.
+// La validación real (horario disponible, sin duplicados) ocurre en
+// el servidor vía la RPC crear_cita (ver functions.sql); aquí solo se
+// filtra para UNA buena experiencia, nunca como única barrera.
+// ------------------------------------------------------------
+const DIA_JS_A_VALOR = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+
+const citaModal = document.getElementById('cita-modal');
+let perfilCita = null;
+let citaMesActual = null; // Date, día 1 del mes mostrado
+let citaFechaSeleccionada = null; // "YYYY-MM-DD"
+let citaHoraSeleccionada = null; // "HH:MM"
+
+function hoyISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function mostrarPasoCita(paso) {
+  ['calendario', 'horarios', 'formulario', 'confirmacion'].forEach(p => {
+    document.getElementById(`cita-paso-${p}`).style.display = p === paso ? 'block' : 'none';
+  });
+}
+
+function abrirModalCita(perfil) {
+  perfilCita = perfil;
+  citaFechaSeleccionada = null;
+  citaHoraSeleccionada = null;
+  const hoy = new Date();
+  citaMesActual = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  mostrarPasoCita('calendario');
+  renderCalendarioCita();
+  citaModal.classList.add('cita-modal--visible');
+  citaModal.setAttribute('aria-hidden', 'false');
+}
+
+function cerrarModalCita() {
+  citaModal.classList.remove('cita-modal--visible');
+  citaModal.setAttribute('aria-hidden', 'true');
+  document.getElementById('form-cita').reset();
+  document.getElementById('cita-error').style.display = 'none';
+}
+
+function renderCalendarioCita() {
+  document.getElementById('cita-dias-semana').innerHTML = CONFIG.DIAS_SEMANA.map(d => `<span>${d.label}</span>`).join('');
+  document.getElementById('cita-mes-actual').textContent =
+    citaMesActual.toLocaleDateString('es', { month: 'long', year: 'numeric' });
+
+  const anio = citaMesActual.getFullYear();
+  const mes = citaMesActual.getMonth();
+  const primerDiaSemana = (new Date(anio, mes, 1).getDay() + 6) % 7; // 0 = lunes (para alinear con DIAS_SEMANA)
+  const diasEnMes = new Date(anio, mes + 1, 0).getDate();
+  const hoy = hoyISO();
+
+  const celdas = [];
+  for (let i = 0; i < primerDiaSemana; i++) celdas.push('<span class="cita-dia cita-dia--vacio"></span>');
+
+  for (let dia = 1; dia <= diasEnMes; dia++) {
+    const fecha = new Date(anio, mes, dia);
+    const fechaISO = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    const diaSemanaValor = DIA_JS_A_VALOR[fecha.getDay()];
+    const habilitado = fechaISO >= hoy && (perfilCita.dias_atencion || []).includes(diaSemanaValor);
+    const esHoy = fechaISO === hoy;
+    celdas.push(
+      `<button type="button" class="cita-dia ${esHoy ? 'cita-dia--hoy' : ''}" data-fecha="${fechaISO}" ${habilitado ? '' : 'disabled'}>${dia}</button>`
+    );
+  }
+
+  document.getElementById('cita-calendario-grid').innerHTML = celdas.join('');
+  document.querySelectorAll('#cita-calendario-grid [data-fecha]:not(:disabled)').forEach(btn => {
+    btn.addEventListener('click', () => seleccionarFechaCita(btn.dataset.fecha));
+  });
+
+  // No permitir navegar a meses anteriores al actual
+  const inicioMesReal = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  document.getElementById('cita-mes-anterior').disabled = citaMesActual <= inicioMesReal;
+}
+
+document.getElementById('cita-mes-anterior').addEventListener('click', () => {
+  citaMesActual = new Date(citaMesActual.getFullYear(), citaMesActual.getMonth() - 1, 1);
+  renderCalendarioCita();
+});
+document.getElementById('cita-mes-siguiente').addEventListener('click', () => {
+  citaMesActual = new Date(citaMesActual.getFullYear(), citaMesActual.getMonth() + 1, 1);
+  renderCalendarioCita();
+});
+
+async function seleccionarFechaCita(fechaISO) {
+  citaFechaSeleccionada = fechaISO;
+  mostrarPasoCita('horarios');
+  const fechaLegible = new Date(fechaISO + 'T00:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('cita-fecha-elegida').textContent = fechaLegible;
+
+  const grid = document.getElementById('cita-horarios-grid');
+  const sinHorarios = document.getElementById('cita-sin-horarios');
+  grid.innerHTML = '<p class="form-hint">Cargando horarios...</p>';
+  sinHorarios.style.display = 'none';
+
+  try {
+    const ocupados = await obtenerHorariosOcupados(perfilCita.slug, fechaISO);
+    let slots = generarSlotsHorario(
+      perfilCita.hora_desde_atencion.slice(0, 5),
+      perfilCita.hora_hasta_atencion.slice(0, 5),
+      perfilCita.duracion_cita_min || CONFIG.DURACION_CITA_DEFECTO
+    ).filter(s => !ocupados.includes(s));
+
+    if (fechaISO === hoyISO()) {
+      const ahora = new Date();
+      const minutosAhora = ahora.getHours() * 60 + ahora.getMinutes();
+      slots = slots.filter(s => {
+        const [h, m] = s.split(':').map(Number);
+        return h * 60 + m > minutosAhora;
+      });
+    }
+
+    if (!slots.length) {
+      grid.innerHTML = '';
+      sinHorarios.style.display = 'block';
+      return;
+    }
+    grid.innerHTML = slots.map(s => `<button type="button" class="cita-horario-slot" data-hora="${s}">${formatearHora12h(s)}</button>`).join('');
+    grid.querySelectorAll('[data-hora]').forEach(btn => {
+      btn.addEventListener('click', () => seleccionarHoraCita(btn.dataset.hora));
+    });
+  } catch (err) {
+    console.error(err);
+    grid.innerHTML = '<p class="form-error">No se pudieron cargar los horarios. Intenta de nuevo.</p>';
+  }
+}
+
+function seleccionarHoraCita(hora) {
+  citaHoraSeleccionada = hora;
+  mostrarPasoCita('formulario');
+  const fechaLegible = new Date(citaFechaSeleccionada + 'T00:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('cita-resumen-elegido').textContent = `${fechaLegible} · ${formatearHora12h(hora)}`;
+}
+
+document.querySelectorAll('.cita-volver').forEach(btn => {
+  btn.addEventListener('click', () => mostrarPasoCita(btn.dataset.volver));
+});
+
+document.getElementById('form-cita').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('cita-error');
+  errorEl.style.display = 'none';
+  const btn = document.getElementById('btn-confirmar-cita');
+  btn.disabled = true;
+  btn.textContent = 'Agendando...';
+
+  const nombre = document.getElementById('cita-nombre').value.trim();
+  const email = document.getElementById('cita-email').value.trim();
+  const descripcion = document.getElementById('cita-descripcion').value.trim();
+
+  try {
+    await crearCita({
+      slug: perfilCita.slug,
+      nombre, email, descripcion,
+      fecha: citaFechaSeleccionada,
+      hora: citaHoraSeleccionada,
+    });
+
+    // Notificación por email al dueño (opcional, ver CONFIG.EMAILJS_*; si no
+    // está configurado esto simplemente no hace nada, la cita ya se guardó).
+    enviarNotificacionCita({
+      to_email: perfilCita.email_contacto,
+      nombre_perfil: perfilCita.nombre_completo,
+      nombre_solicitante: nombre,
+      email_solicitante: email,
+      fecha: citaFechaSeleccionada,
+      hora: formatearHora12h(citaHoraSeleccionada),
+      descripcion: descripcion || '(sin descripción)',
+    });
+
+    const fechaLegible = new Date(citaFechaSeleccionada + 'T00:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('cita-confirmacion-detalle').textContent =
+      `${fechaLegible} a las ${formatearHora12h(citaHoraSeleccionada)} con ${perfilCita.nombre_completo}.`;
+    mostrarPasoCita('confirmacion');
+  } catch (err) {
+    console.error(err);
+    errorEl.textContent = err.message?.includes('reservado')
+      ? 'Ese horario ya fue reservado por alguien más. Elige otro.'
+      : 'No se pudo agendar la cita. Intenta de nuevo.';
+    errorEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirmar cita';
+  }
+});
+
+document.getElementById('btn-cerrar-confirmacion').addEventListener('click', cerrarModalCita);
+document.getElementById('cita-modal-cerrar').addEventListener('click', cerrarModalCita);
+citaModal.addEventListener('click', (e) => { if (e.target === citaModal) cerrarModalCita(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && citaModal.classList.contains('cita-modal--visible')) cerrarModalCita();
 });
 
 init();

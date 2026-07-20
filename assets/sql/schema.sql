@@ -30,7 +30,18 @@ create table if not exists public.profiles (
 
   redes           jsonb not null default '{}'::jsonb, -- {instagram, linkedin, x, facebook, tiktok, web}
 
-  horario_atencion text default '',
+  -- Horario de atención estructurado (reemplaza el antiguo texto libre
+  -- "horario_atencion"): días de la semana + rango horario 24h, usado
+  -- tanto para mostrarlo en el perfil como para generar los bloques
+  -- disponibles del módulo "Agendar una cita".
+  dias_atencion         text[] not null default '{}',
+  hora_desde_atencion   time,
+  hora_hasta_atencion   time,
+  duracion_cita_min     int not null default 30,
+  -- Interruptor independiente en "Visibilidad": aunque haya horario
+  -- configurado, el botón de agendar cita solo aparece si esto es true.
+  permitir_citas        boolean not null default false,
+
   video_url        text default '',
 
   -- Tema de color libre del perfil público (sección "Diseño"):
@@ -50,6 +61,8 @@ create table if not exists public.profiles (
   constraint slug_formato check (slug ~ '^[a-z0-9](-?[a-z0-9])*$' and char_length(slug) between 3 and 40),
   constraint tema_fuente_titulo_valida check (tema_fuente_titulo in ('Poppins','Inter','Montserrat','Playfair Display','Roboto','Lora','Nunito','Space Grotesk','Merriweather','Work Sans','Raleway','Oswald','Quicksand','DM Sans','Bebas Neue','Josefin Sans','Caveat','Abril Fatface','Fira Sans','Ubuntu')),
   constraint tema_fuente_texto_valida check (tema_fuente_texto in ('Poppins','Inter','Montserrat','Playfair Display','Roboto','Lora','Nunito','Space Grotesk','Merriweather','Work Sans','Raleway','Oswald','Quicksand','DM Sans','Bebas Neue','Josefin Sans','Caveat','Abril Fatface','Fira Sans','Ubuntu')),
+  constraint dias_atencion_validos check (dias_atencion <@ array['lunes','martes','miercoles','jueves','viernes','sabado','domingo']::text[]),
+  constraint duracion_cita_rango check (duracion_cita_min between 5 and 240),
   constraint tema_color_primario_formato check (tema_color_primario ~ '^#[0-9a-fA-F]{6}$'),
   constraint tema_color_secundario_formato check (tema_color_secundario ~ '^#[0-9a-fA-F]{6}$')
 );
@@ -81,6 +94,29 @@ create table if not exists public.gallery_images (
 create index if not exists idx_gallery_profile_id on public.gallery_images (profile_id);
 
 -- ------------------------------------------------------------
+-- Tabla: citas
+-- Solicitudes de "Agendar una cita" enviadas desde el perfil público.
+-- Solo el dueño del perfil puede leerlas (RLS); la inserción pública
+-- pasa siempre por la función public.crear_cita() (SECURITY DEFINER,
+-- ver functions.sql), que valida horario/duplicados server-side antes
+-- de escribir, así el visitante nunca escribe directo en la tabla.
+-- ------------------------------------------------------------
+create table if not exists public.citas (
+  id                uuid primary key default gen_random_uuid(),
+  profile_id        uuid not null references public.profiles(id) on delete cascade,
+  nombre_solicitante text not null,
+  email_solicitante  text not null,
+  descripcion        text default '',
+  fecha              date not null,
+  hora               time not null,
+  created_at         timestamptz not null default now(),
+
+  constraint citas_unicas unique (profile_id, fecha, hora)
+);
+
+create index if not exists idx_citas_profile_fecha on public.citas (profile_id, fecha);
+
+-- ------------------------------------------------------------
 -- Slugs reservados (evita palabras de sistema/rutas propias)
 -- ------------------------------------------------------------
 create table if not exists public.slugs_reservados (
@@ -98,3 +134,4 @@ on conflict do nothing;
 alter table public.profiles enable row level security;
 alter table public.gallery_images enable row level security;
 alter table public.slugs_reservados enable row level security;
+alter table public.citas enable row level security;

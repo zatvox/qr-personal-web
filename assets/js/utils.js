@@ -1,6 +1,7 @@
 // ============================================================
 // UTILS — funciones auxiliares compartidas
 // ============================================================
+import { CONFIG } from './config.js';
 
 /** Normaliza texto a slug: minúsculas, sin acentos, solo a-z0-9- */
 export function slugify(texto = '') {
@@ -307,6 +308,93 @@ export function cargarGoogleFont(familia) {
   link.rel = 'stylesheet';
   link.href = `https://fonts.googleapis.com/css2?family=${param}:wght@400;500;600;700&display=swap`;
   document.head.appendChild(link);
+}
+
+// ------------------------------------------------------------
+// Horario de atención / módulo de citas
+// ------------------------------------------------------------
+
+/**
+ * Genera los bloques horarios "HH:MM" entre horaDesde y horaHasta
+ * (strings "HH:MM", 24h) según la duración de cada cita en minutos.
+ * El último bloque generado es el que TERMINA exactamente en horaHasta
+ * (nunca se ofrece un bloque que se salga del rango configurado).
+ */
+export function generarSlotsHorario(horaDesde, horaHasta, duracionMin = 30) {
+  if (!horaDesde || !horaHasta || !duracionMin) return [];
+  const [hD, mD] = horaDesde.split(':').map(Number);
+  const [hH, mH] = horaHasta.split(':').map(Number);
+  const inicioMin = hD * 60 + mD;
+  const finMin = hH * 60 + mH;
+  const slots = [];
+  for (let t = inicioMin; t + duracionMin <= finMin; t += duracionMin) {
+    const h = Math.floor(t / 60).toString().padStart(2, '0');
+    const m = (t % 60).toString().padStart(2, '0');
+    slots.push(`${h}:${m}`);
+  }
+  return slots;
+}
+
+/** Formatea "HH:MM" (24h) a formato legible "h:MM am/pm" */
+export function formatearHora12h(horaHHMM = '') {
+  const [h, m] = horaHHMM.split(':').map(Number);
+  if (Number.isNaN(h)) return '';
+  const periodo = h < 12 ? 'am' : 'pm';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${periodo}`;
+}
+
+/** Texto legible del horario de atención, ej. "Lun, Mié, Vie · 9:00 am – 5:00 pm" */
+export function formatearHorarioAtencion(perfil, diasSemanaConfig) {
+  const dias = perfil?.dias_atencion || [];
+  if (!dias.length || !perfil?.hora_desde_atencion || !perfil?.hora_hasta_atencion) return '';
+  const labels = diasSemanaConfig
+    .filter(d => dias.includes(d.valor))
+    .map(d => d.label);
+  const desde = formatearHora12h(perfil.hora_desde_atencion.slice(0, 5));
+  const hasta = formatearHora12h(perfil.hora_hasta_atencion.slice(0, 5));
+  return `${labels.join(', ')} · ${desde} – ${hasta}`;
+}
+
+// ------------------------------------------------------------
+// EmailJS (opcional) — notifica por correo al dueño del perfil cuando
+// alguien agenda una cita, 100% desde el navegador (sin backend propio).
+// Si CONFIG.EMAILJS_* no está configurado, enviarNotificacionCita()
+// simplemente no hace nada (la cita ya quedó guardada en la DB de
+// todas formas, así que nunca bloquea el flujo principal).
+// ------------------------------------------------------------
+let _emailjsListo = null;
+
+async function asegurarEmailJS() {
+  if (!CONFIG.EMAILJS_PUBLIC_KEY || !CONFIG.EMAILJS_SERVICE_ID || !CONFIG.EMAILJS_TEMPLATE_ID) return false;
+  if (_emailjsListo) return _emailjsListo;
+
+  _emailjsListo = new Promise((resolve) => {
+    if (window.emailjs) { resolve(true); return; }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    script.onload = () => { window.emailjs.init({ publicKey: CONFIG.EMAILJS_PUBLIC_KEY }); resolve(true); };
+    script.onerror = () => resolve(false);
+    document.head.appendChild(script);
+  });
+  return _emailjsListo;
+}
+
+/**
+ * Envía (si EmailJS está configurado) el correo de aviso al dueño del
+ * perfil avisando que alguien agendó una cita. No lanza errores: si
+ * falla o no está configurado, solo lo registra en consola.
+ */
+export async function enviarNotificacionCita(datos) {
+  try {
+    const listo = await asegurarEmailJS();
+    if (!listo) return false;
+    await window.emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, datos);
+    return true;
+  } catch (err) {
+    console.warn('No se pudo enviar la notificación de la cita por email (la cita igual quedó guardada):', err);
+    return false;
+  }
 }
 
 /** Aclara un color mezclándolo con blanco (factor 0 a 1, más alto = más claro). Para fondos pastel derivados del color elegido. */

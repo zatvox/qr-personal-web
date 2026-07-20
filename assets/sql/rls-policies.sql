@@ -70,6 +70,27 @@ create policy "gallery_delete_dueno" on public.gallery_images
   );
 
 -- ------------------------------------------------------------
+-- citas: solo el dueño del perfil puede leer sus propias solicitudes.
+-- No hay política de INSERT pública a propósito: la escritura pasa
+-- siempre por la función public.crear_cita() (SECURITY DEFINER, ver
+-- functions.sql), que valida horario disponible y evita duplicados
+-- antes de insertar, sin exponer la tabla directamente al visitante.
+-- ------------------------------------------------------------
+drop policy if exists "citas_select_dueno" on public.citas;
+create policy "citas_select_dueno" on public.citas
+  for select
+  using (
+    exists (select 1 from public.profiles p where p.id = citas.profile_id and p.user_id = auth.uid())
+  );
+
+drop policy if exists "citas_delete_dueno" on public.citas;
+create policy "citas_delete_dueno" on public.citas
+  for delete
+  using (
+    exists (select 1 from public.profiles p where p.id = citas.profile_id and p.user_id = auth.uid())
+  );
+
+-- ------------------------------------------------------------
 -- slugs_reservados: solo lectura pública, sin escritura desde cliente
 -- ------------------------------------------------------------
 drop policy if exists "slugs_reservados_select_publico" on public.slugs_reservados;

@@ -107,3 +107,96 @@ as $$
 $$;
 
 grant execute on function public.check_slug_available(text) to anon, authenticated;
+
+-- ------------------------------------------------------------
+-- RPC pública: horarios ya ocupados de un perfil en una fecha dada
+-- Devuelve SOLO la hora (nunca nombre/email/descripción de quien
+-- reservó), para que el calendario público pueda deshabilitar esos
+-- bloques sin exponer datos personales de otros visitantes.
+-- ------------------------------------------------------------
+create or replace function public.obtener_horarios_ocupados(p_slug text, p_fecha date)
+returns table(hora time)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select c.hora
+  from public.citas c
+  join public.profiles p on p.id = c.profile_id
+  where p.slug = lower(p_slug) and c.fecha = p_fecha;
+$$;
+
+grant execute on function public.obtener_horarios_ocupados(text, date) to anon, authenticated;
+
+-- ------------------------------------------------------------
+-- RPC pública: crear una cita validando en el servidor (nunca confiar
+-- solo en el JS del cliente):
+--   - el perfil existe, está activo y permite citas
+--   - el día de la semana de p_fecha está en dias_atencion
+--   - la fecha no es pasada
+--   - la hora cae dentro de [hora_desde_atencion, hora_hasta_atencion)
+--   - la hora coincide con un bloque válido según duracion_cita_min
+--   - el bloque no está ya tomado (constraint citas_unicas como respaldo)
+-- ------------------------------------------------------------
+create or replace function public.crear_cita(
+  p_slug text,
+  p_nombre text,
+  p_email text,
+  p_descripcion text,
+  p_fecha date,
+  p_hora time
+)
+returns public.citas
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  perfil public.profiles%rowtype;
+  dia_semana text;
+  dias_es text[] := array['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  minutos_desde_inicio int;
+  nueva public.citas%rowtype;
+begin
+  select * into perfil from public.profiles where slug = lower(p_slug);
+  if perfil.id is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+  if not perfil.activo or not perfil.permitir_citas then
+    raise exception 'Este perfil no acepta citas en este momento';
+  end if;
+  if trim(coalesce(p_nombre, '')) = '' or p_email !~ '^[^\s@]+@[^\s@]+\.[^\s@]+$' then
+    raise exception 'Nombre o correo inválido';
+  end if;
+  if p_fecha < current_date then
+    raise exception 'La fecha ya pasó';
+  end if;
+
+  dia_semana := dias_es[extract(dow from p_fecha)::int + 1];
+  if not (dia_semana = any(perfil.dias_atencion)) then
+    raise exception 'Ese día no está disponible';
+  end if;
+
+  if perfil.hora_desde_atencion is null or perfil.hora_hasta_atencion is null
+     or p_hora < perfil.hora_desde_atencion or p_hora >= perfil.hora_hasta_atencion then
+    raise exception 'Ese horario está fuera del rango de atención';
+  end if;
+
+  minutos_desde_inicio := extract(epoch from (p_hora - perfil.hora_desde_atencion)) / 60;
+  if minutos_desde_inicio % greatest(perfil.duracion_cita_min, 1) <> 0 then
+    raise exception 'Horario inválido';
+  end if;
+
+  insert into public.citas (profile_id, nombre_solicitante, email_solicitante, descripcion, fecha, hora)
+  values (perfil.id, trim(p_nombre), lower(trim(p_email)), coalesce(p_descripcion, ''), p_fecha, p_hora)
+  returning * into nueva;
+
+  return nueva;
+exception
+  when unique_violation then
+    raise exception 'Ese horario ya fue reservado por alguien más, elige otro';
+end;
+$$;
+
+grant execute on function public.crear_cita(text, text, text, text, date, time) to anon, authenticated;
