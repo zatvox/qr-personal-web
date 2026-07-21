@@ -2,16 +2,15 @@
    RESPONSIVE — Mobile First (320, 640, 1024, 1440, 1920)
 ============================================================ */
 
-/* Base: móvil (320px+) ya cubierta en styles.css como default */
-
-.wizard-layout {
-  grid-template-columns: 1fr; /* móvil: apilado */
-}
-
-.tarjeta-preview {
-  position: static;
-  order: -1; /* preview arriba en móvil */
-}
+/* Base: móvil (320px+) ya cubierta en styles.css como default.
+   NOTA: el layout de 2 columnas del wizard/dashboard (.wizard-layout,
+   .tarjeta-preview) se define directamente en styles.css (con su
+   propio @media min-width:1024px) y NO aquí, porque los @import
+   siempre se resuelven antes que el resto de styles.css: si esas
+   reglas solo vivieran en este archivo, quedarían sobrescritas por
+   las reglas sin media query de styles.css en TODOS los anchos,
+   incluido el móvil (este fue justamente el bug del layout cortado
+   a la derecha en celular). Ver styles.css para la fuente de verdad. */
 
 .perfil-galeria {
   grid-template-columns: repeat(2, 1fr);

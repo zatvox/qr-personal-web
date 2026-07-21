@@ -83,10 +83,21 @@ img { max-width: 100%; display: block; }
 ------------------------------------------------------------ */
 .wizard-layout {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1fr; /* móvil: apilado (evita el corte horizontal) */
   gap: var(--space-lg);
   align-items: start;
   padding: var(--space-lg) 0 var(--space-xl);
+}
+
+/* Layout lado a lado solo desde escritorio/tablet grande. Esta regla
+   vive aquí (no solo en responsive.css) porque los @import siempre se
+   resuelven ANTES que el resto de este archivo: si el 2-columnas
+   quedara sin media query aquí, ganaría en TODOS los anchos, incluido
+   el móvil, aunque responsive.css diga lo contrario (bug corregido). */
+@media (min-width: 1024px) {
+  .wizard-layout {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
 }
 
 .wizard-pasos {
@@ -126,13 +137,21 @@ img { max-width: 100%; display: block; }
    Preview de tarjeta (vive en wizard, dashboard y perfil público)
 ------------------------------------------------------------ */
 .tarjeta-preview {
-  position: sticky;
-  top: var(--space-md);
+  position: static; /* móvil: no sticky, para que no se quede angosta al costado */
+  order: -1; /* móvil: la vista previa va arriba del formulario */
   background: var(--color-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .tarjeta-preview {
+    position: sticky;
+    top: var(--space-md);
+    order: 0;
+  }
 }
 
 /* Banda de color que refleja la paleta elegida en "Diseño", en tiempo
