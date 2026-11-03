@@ -5,20 +5,21 @@
 ## Flujo de datos
 
 ```
-Visitante → index.html (wizard) → localStorage (borrador)
+Visitante → index.html (landing) → crear.html (wizard) → localStorage (borrador)
    → signUp() con datos en user_metadata → Supabase Auth
    → confirma email → trigger handle_new_user() → INSERT en profiles
    → login → dashboard.html (lee/edita su profile vía RLS)
    → genera QR (cliente) → link https://sitio/u/slug
    → público escanea QR → 404.html redirige → perfil.html?u=slug
-   → SELECT público (activo=true) en profiles + gallery_images
+   → SELECT público (activo=true) en profiles + portfolio_items/portfolio_images (sin ítems privados)
 ```
 
 ## Módulos
 
 | Módulo | Páginas | JS | Descripción |
 |---|---|---|---|
-| Wizard | `index.html` | `wizard.js` | Captura datos sin persistir en DB, preview en vivo, toast de aviso |
+| Landing | `index.html` | `landing.js` | Página de venta: demo con datos embebidos (sin backend), precios y FAQ |
+| Wizard | `crear.html` | `wizard.js` | Captura datos sin persistir en DB, preview en vivo, toast de aviso |
 | Auth | `pages/login.html` | `auth.js`, `login.js` | Registro (desde wizard), login, reenvío de confirmación |
 | Dashboard | `pages/dashboard.html` | `dashboard.js` | CRUD del perfil propio, subida de avatar y galería (con compresión), generación/descarga de QR |
 | Perfil público | `pages/perfil.html` | `perfil.js`, `vcard.js` | Vista pública, botón guardar contacto (.vcf), galería, video |
@@ -40,6 +41,14 @@ Ver diagrama ER y detalle de columnas en `docs/ARQUITECTURA-VCARD.md` sección 4
 ## Decisiones técnicas (ADRs)
 
 Ver índice completo en `docs/ARQUITECTURA-VCARD.md` sección 5. Resumen: ADR-001 Supabase serverless · ADR-002 QR en cliente · ADR-003 URLs bonitas · ADR-004 datos en `user_metadata` hasta confirmación · ADR-005 compresión de imágenes en cliente (crítico para no saturar el free tier de Storage con muchos usuarios).
+
+## Portafolio, planes y panel admin (migración 007)
+
+- **Portafolio:** `portfolio_items` (1 trabajo) → `portfolio_images` (N fotos con `caption`). Reemplaza a `gallery_images`, que se conserva solo como respaldo de la migración. UI: `portafolio-editor.js` (dashboard) y `perfil-portafolio.js` (carrusel con scroll-snap). Datos: `portafolio-data.js`.
+- **Planes:** `profiles.plan` (`gratis`/`pro`) + `plan_vence_en`. El plan *efectivo* lo calcula la BD (`plan_efectivo()`); un Pro vencido cae solo a Gratis. Topes: Gratis 3×2, Pro 30×8, privados solo Pro — forzados por triggers en la BD, el JS solo pinta contadores (`CONFIG.PLANES`). Las columnas de plan están blindadas por trigger: un usuario normal no puede cambiárselas.
+- **Privacidad:** los ítems `privado` se excluyen en la RLS (no solo en el JS). El bucket `gallery` es público, así que un privado queda oculto pero su archivo sigue accesible por URL directa.
+- **Admin:** tabla `admins` (sin policies, se llena desde el SQL Editor) + `es_admin()`. `pages/admin.html` usa RPCs `SECURITY DEFINER` (`admin_listar_usuarios`, `admin_registrar_pago`, `admin_cambiar_plan`, `admin_activar_perfil`) que verifican admin en el servidor. Tabla `pagos` con historial.
+- **Capa de datos:** además de `supabase-data.js`, `portafolio-data.js` y `admin-data.js` (misma regla: la UI nunca habla directo con Supabase).
 
 ## Mantenimiento
 

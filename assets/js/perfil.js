@@ -2,7 +2,8 @@
 // PERFIL PÚBLICO (pages/perfil.html?u=slug)
 // ============================================================
 import { CONFIG } from './config.js';
-import { obtenerPerfilPublico, obtenerGaleria, obtenerHorariosOcupados, crearCita } from './supabase-data.js';
+import { obtenerPerfilPublico, obtenerHorariosOcupados, crearCita } from './supabase-data.js';
+import { renderPortafolio } from './perfil-portafolio.js';
 import { descargarVcf } from './vcard.js';
 import {
   escapeHtml, soloDigitos, esHexValido, colorTextoLegible, mezclarConBlanco,
@@ -134,29 +135,11 @@ async function render(perfil) {
     btn.addEventListener('click', () => abrirModalCita(perfil));
   }
 
-  // Galería (mini-portafolio): imagen + título + descripción + enlace opcional
+  // Portafolio: trabajos con carrusel de fotos (ver perfil-portafolio.js)
   try {
-    const fotos = await obtenerGaleria(perfil.id);
-    if (fotos.length) {
-      document.getElementById('p-galeria').innerHTML = fotos.map(f => `
-        <div class="perfil-galeria__item">
-          <img src="${escapeHtml(f.url)}" alt="${escapeHtml(f.titulo || 'Foto de galería')}" loading="lazy">
-          ${(f.titulo || f.descripcion || f.url_link) ? `
-            <div class="perfil-galeria__item-texto">
-              ${f.titulo ? `<p class="perfil-galeria__item-titulo">${escapeHtml(f.titulo)}</p>` : ''}
-              ${f.descripcion ? `<p class="perfil-galeria__item-desc">${escapeHtml(f.descripcion)}</p>` : ''}
-              ${f.url_link ? `<a class="perfil-galeria__item-link" href="${escapeHtml(f.url_link)}" target="_blank" rel="noopener">Ver más →</a>` : ''}
-            </div>` : ''}
-        </div>
-      `).join('');
-      document.getElementById('p-galeria-card').style.display = 'block';
-
-      document.querySelectorAll('#p-galeria .perfil-galeria__item img').forEach(img => {
-        img.addEventListener('click', () => abrirLightbox(img.src, img.alt));
-      });
-    }
+    await renderPortafolio(perfil, abrirLightbox);
   } catch (err) {
-    console.warn('No se pudo cargar la galería:', err);
+    console.warn('No se pudo cargar el portafolio:', err);
   }
 
   document.getElementById('btn-guardar-contacto').addEventListener('click', () => descargarVcf(perfil));

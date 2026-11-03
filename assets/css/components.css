@@ -192,41 +192,6 @@ table.data-table th, table.data-table td {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Editor de galería del dashboard: cada foto es una tarjeta con
-   miniatura + campos de título/descripción/enlace (portafolio). */
-.galeria-editor-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-md);
-}
-
-.galeria-item--editable {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-sm);
-  background: var(--gray-50);
-}
-
-.galeria-item__imagen-wrap { position: relative; margin-bottom: var(--space-sm); }
-.galeria-item__imagen-wrap img {
-  width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
-  border-radius: var(--radius-sm);
-  display: block;
-}
-.galeria-item__borrar {
-  position: absolute; top: 6px; right: 6px;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255,255,255,0.92);
-  color: var(--color-error-text);
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-}
-.galeria-item__borrar:hover { background: #fff; }
-.galeria-item__estado { min-height: 1.2em; }
-
 /* Horario de atención (dashboard/perfil): selector de días + rango horario */
 .dias-semana-picker { display: flex; gap: 6px; flex-wrap: wrap; }
 .dia-semana-chip {

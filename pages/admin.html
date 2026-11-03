@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel admin | QR Personal System</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="../assets/images/logo.svg">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="../assets/css/portafolio.css">
+</head>
+<body>
+
+<header class="container">
+  <nav class="navbar">
+    <a class="navbar__logo" href="dashboard.html"><img src="../assets/images/logo.svg" alt="" width="32" height="32"> Panel admin</a>
+    <div style="display:flex; gap: 8px;">
+      <a class="btn btn-secondary" href="dashboard.html">Mi panel</a>
+      <button class="btn btn-tertiary" id="btn-logout" type="button">Cerrar sesión</button>
+    </div>
+  </nav>
+</header>
+
+<main class="container" style="padding-bottom: var(--space-xl);">
+  <div id="estado-carga" class="estado-mensaje"><span class="spinner"></span><p>Verificando acceso...</p></div>
+
+  <div id="estado-no-autorizado" class="estado-mensaje" style="display:none;">
+    <h1>Acceso restringido</h1>
+    <p>Esta sección es solo para administradores.</p>
+    <a class="btn btn-primary" href="dashboard.html">Volver a mi panel</a>
+  </div>
+
+  <div id="admin-contenido" style="display:none;">
+    <h1>Usuarios, planes y pagos</h1>
+
+    <div class="adm-resumen" id="adm-resumen"></div>
+
+    <div class="adm-barra">
+      <input class="form-input" type="search" id="adm-buscar" placeholder="Buscar por nombre, correo o link" aria-label="Buscar usuario">
+      <select class="form-select" id="adm-filtro" aria-label="Filtrar por estado">
+        <option value="todos">Todos</option>
+        <option value="pro">Pro vigente</option>
+        <option value="por_vencer">Por vencer (7 días)</option>
+        <option value="vencido">Vencidos</option>
+        <option value="gratis">Gratis</option>
+        <option value="pausado">Perfil pausado</option>
+      </select>
+      <button class="btn btn-secondary" id="adm-recargar" type="button">Recargar</button>
+    </div>
+
+    <div id="adm-error" class="form-error" role="alert" style="display:none;"></div>
+    <div id="adm-exito" class="form-success" role="status" style="display:none;"></div>
+
+    <div id="adm-lista"></div>
+  </div>
+</main>
+
+<script type="module" src="../assets/js/admin.js"></script>
+</body>
+</html>

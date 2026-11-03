@@ -12,15 +12,6 @@
    incluido el móvil (este fue justamente el bug del layout cortado
    a la derecha en celular). Ver styles.css para la fuente de verdad. */
 
-.perfil-galeria {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-/* 640px: tablets pequeñas */
-@media (min-width: 640px) {
-  .perfil-galeria { grid-template-columns: repeat(3, 1fr); }
-}
-
 /* 1024px: layout de escritorio con preview lateral fijo */
 @media (min-width: 1024px) {
   .wizard-layout {

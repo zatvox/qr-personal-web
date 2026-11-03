@@ -6,6 +6,7 @@
 <title>Mi panel | QR Personal System</title>
 <link rel="icon" type="image/svg+xml" href="../assets/images/logo.svg">
 <link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="../assets/css/portafolio.css">
 </head>
 <body>
 
@@ -13,6 +14,7 @@
   <nav class="navbar">
     <a class="navbar__logo" href="../index.html"><img src="../assets/images/logo.svg" alt="" width="32" height="32"> QR Personal System</a>
     <div style="display:flex; gap: 8px;">
+      <a class="btn btn-secondary" id="link-admin" href="admin.html" style="display:none;">Panel admin</a>
       <a class="btn btn-secondary" id="link-ver-perfil" href="#" target="_blank" rel="noopener">Ver mi página</a>
       <button class="btn btn-tertiary" id="btn-logout">Cerrar sesión</button>
     </div>
@@ -215,25 +217,46 @@
             </div>
           </details>
 
-          <!-- Galería -->
-          <details class="accordion-section" data-seccion="galeria">
+          <!-- Portafolio (reemplaza a la antigua galería) -->
+          <details class="accordion-section" data-seccion="portafolio">
             <summary>
-              <span class="accordion-section__icono">🖼️</span>
+              <span class="accordion-section__icono">💼</span>
               <span class="accordion-section__texto">
-                <div>Galería de fotos</div>
-                <div class="accordion-section__hint" id="galeria-contador">0 de 6 fotos usadas</div>
+                <div>Portafolio</div>
+                <div class="accordion-section__hint" id="portafolio-contador">0 de 3 trabajos usados</div>
               </span>
               <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </summary>
             <div class="accordion-section__body">
-              <p class="form-hint" style="margin-bottom: var(--space-sm);">Usa esta galería como un mini-portafolio: cada foto puede tener su propio título, descripción y enlace (ej. a un producto o proyecto). Se muestra al final de tu tarjeta pública, debajo del horario de atención.</p>
-              <div class="galeria-editor-grid" id="galeria-grid" style="margin-bottom: var(--space-sm);"></div>
-              <div class="form-group">
-                <label class="form-label" for="galeria-file">Agregar fotos</label>
-                <input class="form-input" type="file" id="galeria-file" accept="image/png, image/jpeg, image/webp" multiple>
-                <p class="form-hint">Se comprimen automáticamente al subirlas para no gastar tu cuota gratuita. Máx. 6 fotos.</p>
+              <p class="form-hint" id="portafolio-plan" style="margin-bottom: var(--space-sm);"></p>
+              <p class="form-hint" style="margin-bottom: var(--space-sm);">Muestra tus trabajos, proyectos, productos o platos: cada uno con varias fotos, una descripción y un botón con enlace. Se ve en tu tarjeta pública, debajo del horario. Los cambios de esta lista se guardan solos.</p>
+
+              <div id="portafolio-lista" class="pf-editor-lista"></div>
+              <div id="portafolio-error" class="form-error" role="alert" style="display:none;"></div>
+              <button type="button" class="btn btn-secondary" id="btn-nuevo-item" style="margin-top: var(--space-sm);">+ Agregar trabajo</button>
+
+              <div class="pf-ajustes">
+                <p class="paleta-picker__label">Ajustes de la sección (se guardan con "Guardar cambios")</p>
+                <div class="form-group">
+                  <label class="form-label" for="portafolio_titulo">Título de la sección</label>
+                  <input class="form-input" type="text" id="portafolio_titulo" maxlength="40" placeholder="Portafolio, Mis trabajos, Nuestra carta...">
+                </div>
+                <div class="pf-fila-2">
+                  <div class="form-group">
+                    <label class="form-label" for="portafolio_label_a">Nombre del grupo 1</label>
+                    <input class="form-input" type="text" id="portafolio_label_a" maxlength="30" placeholder="Ej. Funcionales">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="portafolio_label_b">Nombre del grupo 2</label>
+                    <input class="form-input" type="text" id="portafolio_label_b" maxlength="30" placeholder="Ej. En desarrollo">
+                  </div>
+                </div>
+                <p class="form-hint">Si dejas ambos nombres vacíos, tus trabajos se muestran en una sola lista. Si escribes alguno, se separan en dos bloques.</p>
+                <div class="form-group form-check">
+                  <input type="checkbox" id="mostrar_portafolio">
+                  <label class="form-label" for="mostrar_portafolio" style="margin:0;">Mostrar el portafolio en mi tarjeta pública</label>
+                </div>
               </div>
-              <div id="galeria-error" class="form-error" role="alert" style="display:none;"></div>
             </div>
           </details>
 

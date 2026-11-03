@@ -5,9 +5,10 @@ import { CONFIG } from './config.js';
 import { protegerPagina, cerrarSesion } from './auth.js';
 import {
   obtenerMiPerfil, actualizarPerfil, subirAvatar,
-  obtenerGaleria, agregarFotoGaleria, eliminarFotoGaleria, actualizarFotoGaleria,
   obtenerCitas, eliminarCita,
 } from './supabase-data.js';
+import { iniciarEditorPortafolio, actualizarPerfilEnEditor } from './portafolio-editor.js';
+import { esAdmin } from './admin-data.js';
 import { renderizarQR, descargarQR } from './qr.js';
 import { escapeHtml, comprimirImagen, base64ADataBlob, esHexValido, mezclarConBlanco, iconoRedSocial, iconoContacto, cargarGoogleFont, colorTextoLegible, debounce, formatearHorarioAtencion, formatearHora12h } from './utils.js';
 import { getSupabaseClient } from './supabase-client.js';
@@ -16,7 +17,6 @@ const CAMPOS_TEXTO = ['nombre_completo', 'cargo', 'empresa', 'bio', 'telefono', 
 
 let sesion = null;
 let perfilActual = null;
-let galeriaActual = [];
 let colorPrimario = CONFIG.TEMA_PRIMARIO_DEFECTO;
 let colorSecundario = CONFIG.TEMA_SECUNDARIO_DEFECTO;
 let fuenteTitulo = CONFIG.FUENTE_TITULO_DEFECTO;
@@ -202,6 +202,10 @@ function llenarFormulario(perfil) {
   document.getElementById('mostrar_email').checked = !!perfil.mostrar_email;
   document.getElementById('activo').checked = !!perfil.activo;
   document.getElementById('permitir_citas').checked = !!perfil.permitir_citas;
+  document.getElementById('portafolio_titulo').value = perfil.portafolio_titulo || 'Portafolio';
+  document.getElementById('portafolio_label_a').value = perfil.portafolio_label_a || '';
+  document.getElementById('portafolio_label_b').value = perfil.portafolio_label_b || '';
+  document.getElementById('mostrar_portafolio').checked = perfil.mostrar_portafolio !== false;
   document.getElementById('slug').value = perfil.slug || '';
 
   diasAtencionSeleccionados = Array.isArray(perfil.dias_atencion) ? [...perfil.dias_atencion] : [];
@@ -295,6 +299,10 @@ function recolectarCambios() {
   CAMPOS_TEXTO.forEach(id => { cambios[id] = document.getElementById(id).value.trim(); });
   cambios.mostrar_email = document.getElementById('mostrar_email').checked;
   cambios.permitir_citas = document.getElementById('permitir_citas').checked;
+  cambios.portafolio_titulo = document.getElementById('portafolio_titulo').value.trim() || 'Portafolio';
+  cambios.portafolio_label_a = document.getElementById('portafolio_label_a').value.trim();
+  cambios.portafolio_label_b = document.getElementById('portafolio_label_b').value.trim();
+  cambios.mostrar_portafolio = document.getElementById('mostrar_portafolio').checked;
   cambios.dias_atencion = diasAtencionSeleccionados;
   cambios.hora_desde_atencion = inputHoraDesde.value || null;
   cambios.hora_hasta_atencion = inputHoraHasta.value || null;
@@ -326,129 +334,10 @@ document.getElementById('avatar-file').addEventListener('change', (e) => {
 });
 
 // ------------------------------------------------------------
-// Galería: render + subir + borrar (con compresión cliente, ADR-005)
+// Portafolio: toda la lógica vive en portafolio-editor.js
+// (reemplazó a la antigua galería; gallery_images queda solo como
+// respaldo de la migración 007).
 // ------------------------------------------------------------
-// Autoguardado por foto (debounced) para no disparar una petición por
-// cada tecla al escribir título/descripción/enlace de cada imagen.
-// Se usa un debounce independiente por cada campo (id+campo) para que
-// escribir en una foto no cancele el guardado pendiente de otra.
-async function guardarMetadataInmediato(id, cambios, indicadorEl) {
-  try {
-    if (indicadorEl) { indicadorEl.textContent = 'Guardando...'; indicadorEl.className = 'form-hint'; }
-    const actualizado = await actualizarFotoGaleria(id, cambios);
-    const idx = galeriaActual.findIndex(f => f.id === id);
-    if (idx !== -1) galeriaActual[idx] = { ...galeriaActual[idx], ...actualizado };
-    if (indicadorEl) { indicadorEl.textContent = 'Guardado ✓'; indicadorEl.className = 'form-success'; }
-  } catch (err) {
-    console.error(err);
-    if (indicadorEl) { indicadorEl.textContent = 'No se pudo guardar.'; indicadorEl.className = 'form-error'; }
-  }
-}
-const _debouncersPorCampo = new Map();
-function guardarMetadataDebounced(id, cambios, indicadorEl) {
-  const clave = `${id}:${Object.keys(cambios)[0]}`;
-  if (!_debouncersPorCampo.has(clave)) {
-    _debouncersPorCampo.set(clave, debounce((...args) => guardarMetadataInmediato(...args), 700));
-  }
-  _debouncersPorCampo.get(clave)(id, cambios, indicadorEl);
-}
-
-function renderGaleria() {
-  const grid = document.getElementById('galeria-grid');
-  const contador = document.getElementById('galeria-contador');
-  contador.textContent = `${galeriaActual.length} de ${CONFIG.GALERIA_MAX_FOTOS} fotos usadas`;
-
-  grid.innerHTML = galeriaActual.map(foto => `
-    <div class="galeria-item galeria-item--editable" data-id="${foto.id}">
-      <div class="galeria-item__imagen-wrap">
-        <img src="${escapeHtml(foto.url)}" alt="Foto de galería">
-        <button type="button" class="galeria-item__borrar" data-borrar-id="${foto.id}" data-borrar-path="${escapeHtml(foto.storage_path)}" aria-label="Borrar foto">&times;</button>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Título</label>
-        <input class="form-input" type="text" maxlength="80" data-campo="titulo" data-id="${foto.id}" value="${escapeHtml(foto.titulo || '')}" placeholder="Ej. Proyecto de branding">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Descripción</label>
-        <textarea class="form-textarea" maxlength="200" data-campo="descripcion" data-id="${foto.id}" placeholder="Breve descripción de esta foto o proyecto">${escapeHtml(foto.descripcion || '')}</textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Enlace (opcional)</label>
-        <input class="form-input" type="url" data-campo="url_link" data-id="${foto.id}" value="${escapeHtml(foto.url_link || '')}" placeholder="https://...">
-      </div>
-      <p class="form-hint galeria-item__estado" data-estado-id="${foto.id}">&nbsp;</p>
-    </div>
-  `).join('');
-
-  grid.querySelectorAll('[data-campo]').forEach(input => {
-    input.addEventListener('input', () => {
-      const id = input.dataset.id;
-      const campo = input.dataset.campo;
-      const indicadorEl = grid.querySelector(`[data-estado-id="${id}"]`);
-      guardarMetadataDebounced(id, { [campo]: input.value.trim() }, indicadorEl);
-    });
-  });
-
-  grid.querySelectorAll('[data-borrar-id]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.borrarId;
-      const path = btn.dataset.borrarPath;
-      btn.disabled = true;
-      try {
-        await eliminarFotoGaleria(id, path);
-        galeriaActual = galeriaActual.filter(f => f.id !== id);
-        renderGaleria();
-      } catch (err) {
-        console.error(err);
-        document.getElementById('galeria-error').textContent = 'No se pudo borrar la foto.';
-        document.getElementById('galeria-error').style.display = 'block';
-        btn.disabled = false;
-      }
-    });
-  });
-
-  document.getElementById('galeria-file').disabled = galeriaActual.length >= CONFIG.GALERIA_MAX_FOTOS;
-}
-
-document.getElementById('galeria-file').addEventListener('change', async (e) => {
-  const errorEl = document.getElementById('galeria-error');
-  errorEl.style.display = 'none';
-  const archivos = Array.from(e.target.files);
-  e.target.value = '';
-
-  const espacioDisponible = CONFIG.GALERIA_MAX_FOTOS - galeriaActual.length;
-  if (espacioDisponible <= 0) {
-    errorEl.textContent = `Ya tienes el máximo de ${CONFIG.GALERIA_MAX_FOTOS} fotos. Borra alguna para agregar otra.`;
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  const aSubir = archivos.slice(0, espacioDisponible);
-  if (archivos.length > espacioDisponible) {
-    errorEl.textContent = `Solo se subirán ${espacioDisponible} foto(s); ya alcanzaste el límite de ${CONFIG.GALERIA_MAX_FOTOS}.`;
-    errorEl.style.display = 'block';
-  }
-
-  for (const archivo of aSubir) {
-    try {
-      if (archivo.size > CONFIG.GALERIA_MAX_MB * 1024 * 1024) {
-        throw new Error(`"${archivo.name}" supera ${CONFIG.GALERIA_MAX_MB}MB.`);
-      }
-      const blob = await comprimirImagen(archivo, CONFIG.GALERIA_RESIZE_MAX_PX, CONFIG.GALERIA_JPEG_CALIDAD);
-      if (blob.size > CONFIG.POST_COMPRESION_MAX_KB * 1024) {
-        throw new Error(`"${archivo.name}" sigue siendo muy pesada después de comprimir.`);
-      }
-      const orden = galeriaActual.length;
-      const nueva = await agregarFotoGaleria(sesion.user.id, perfilActual.id, blob, orden);
-      galeriaActual.push(nueva);
-      renderGaleria();
-    } catch (err) {
-      console.error(err);
-      errorEl.textContent = err.message || 'No se pudo subir una de las fotos.';
-      errorEl.style.display = 'block';
-    }
-  }
-});
 
 // ------------------------------------------------------------
 // Citas recibidas: lista de solo lectura + botón para descartar
@@ -539,9 +428,9 @@ async function init() {
     await importarAvatarPendienteSiExiste();
 
     llenarFormulario(perfilActual);
-    galeriaActual = await obtenerGaleria(perfilActual.id);
-    renderGaleria();
+    iniciarEditorPortafolio({ userId: sesion.user.id, perfil: perfilActual });
     cargarCitas();
+    esAdmin().then(ok => { if (ok) document.getElementById('link-admin').style.display = ''; });
     document.getElementById('estado-carga').style.display = 'none';
     document.getElementById('dashboard-contenido').style.display = 'block';
   } catch (err) {
@@ -586,6 +475,7 @@ document.getElementById('form-dashboard').addEventListener('submit', async (e) =
     const cambios = { ...recolectarCambios(), foto_url };
     perfilActual = await actualizarPerfil(sesion.user.id, cambios);
     llenarFormulario(perfilActual);
+    actualizarPerfilEnEditor(perfilActual);
     exitoEl.textContent = 'Cambios guardados correctamente.';
     exitoEl.style.display = 'block';
   } catch (err) {

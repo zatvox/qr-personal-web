@@ -18,6 +18,15 @@ En el panel de Supabase ve a **SQL Editor** y ejecuta, **en este orden**:
 
 > Si ya habías corrido `schema.sql` antes de la versión con selector de tema de color, corre además `assets/sql/migrations/001_add_tema_perfil.sql` para agregar la columna `tema` sin perder tus datos.
 
+> **Migraciones 001 a 007.** Después de los tres archivos de arriba, corre en orden las de `assets/sql/migrations/` que aún no hayas ejecutado. La **007_portafolio_admin.sql** agrega el portafolio (ítems con varias fotos), los planes Gratis/Pro, los pagos y el panel admin, y migra la galería antigua sin perder nada. Es idempotente.
+>
+> **Tu usuario admin** (una sola vez, en el SQL Editor, con tu correo real):
+> ```sql
+> insert into public.admins (user_id) select id from auth.users where email = 'TU_CORREO' on conflict do nothing;
+> update public.profiles set plan = 'pro', plan_vence_en = null where user_id in (select user_id from public.admins);
+> ```
+> Con eso te aparece el botón **Panel admin** en el dashboard (`pages/admin.html`). Los pagos se registran a mano ahí: activa Pro y calcula el vencimiento.
+
 ## 3. Crear los buckets de Storage
 
 En **Storage**, crea dos buckets **públicos**:

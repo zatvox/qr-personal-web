@@ -2,260 +2,270 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crea tu tarjeta digital y tu QR gratis | QR Personal System</title>
-<meta name="description" content="Crea tu página personal y genera tu código QR único gratis. Comparte tu contacto, redes y más en segundos.">
-<link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TARJE — Tu tarjeta de presentación en un QR</title>
+<meta name="description" content="Crea tu tarjeta de presentación digital con portafolio, QR propio y agenda de citas. Imprime el QR una vez; tus datos los cambias cuando quieras.">
+<meta name="theme-color" content="#6355C7">
+<link rel="icon" href="assets/images/logo.svg">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/landing.css">
 </head>
-<body>
+<body class="lp" id="top">
 
-<header class="container">
-  <nav class="navbar">
-    <span class="navbar__logo"><img src="assets/images/logo.svg" alt="" width="32" height="32"> QR Personal System</span>
-    <a class="btn btn-tertiary" href="pages/login.html">Ya tengo cuenta</a>
-  </nav>
-</header>
+<!-- ============ NAVBAR ============ -->
+<nav class="lp-nav">
+  <div class="lp-wrap lp-nav__inner">
+    <a class="lp-brand" href="#top" aria-label="TARJE, inicio">
+      <span class="lp-brand__mark" aria-hidden="true"><i></i><i></i><i></i><b></b></span>
+      <span class="lp-brand__name" data-marca>TARJE</span>
+    </a>
+    <div class="lp-nav__links">
+      <a class="lp-nav__txt" href="#demo">Ejemplos</a>
+      <a class="lp-nav__txt" href="#precios">Precios</a>
+      <a class="lp-nav__txt lp-nav__login" href="pages/login.html">Iniciar sesión</a>
+      <a class="lp-btn lp-btn--ink lp-btn--sm" href="crear.html">Crear mi tarjeta</a>
+    </div>
+  </div>
+</nav>
 
-<main class="container">
-  <section style="text-align:center; padding: var(--space-md) 0 var(--space-lg);">
-    <h1>Crea tu tarjeta de presentación digital</h1>
-    <p style="color: var(--gray-600); max-width: 560px; margin: 0 auto;">
-      Completa tus datos, mira el resultado en vivo y obtén tu código QR único. 100% gratis.
-    </p>
-  </section>
+<main>
+<!-- ============ HERO ============ -->
+<header class="lp-hero">
+  <div class="lp-wrap lp-hero__grid">
+    <div class="lp-hero__copy">
+      <h1>Tu tarjeta de presentación <span>que nunca se acaba.</span></h1>
+      <p class="lp-hero__sub">
+        Un QR que abre tu perfil completo: quién eres, tu portafolio y tu WhatsApp.
+        Lo imprimes una sola vez y tus datos los cambias cuando quieras.
+      </p>
+      <div class="lp-hero__cta">
+        <a class="lp-btn lp-btn--aji lp-btn--lg" href="crear.html">Crear mi tarjeta gratis</a>
+        <a class="lp-btn lp-btn--line lp-btn--lg" href="#demo">Ver un ejemplo</a>
+      </div>
+      <p class="lp-hero__note">Gratis para empezar. Tu QR queda listo hoy.</p>
+    </div>
 
-  <form id="wizard-form" novalidate>
-    <div class="wizard-layout">
+    <div class="lp-scene" id="escena" aria-label="Un celular escaneando el QR de una tarjeta impresa y abriendo el perfil">
+      <div class="lp-scene__blob" aria-hidden="true"></div>
 
-      <!-- ================= SECCIONES DESPLEGABLES ================= -->
-      <div>
-
-        <!-- Sección: Diseño -->
-        <details class="accordion-section" open data-seccion="diseno">
-          <summary>
-            <span class="accordion-section__icono">🎨</span>
-            <span class="accordion-section__texto">
-              <div>Diseño</div>
-              <div class="accordion-section__hint">Elige un tema de color para tu página</div>
-            </span>
-            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </summary>
-          <div class="accordion-section__body">
-            <p class="paleta-picker__label">Paleta de colores</p>
-            <div class="paleta-swatches" id="paleta-swatches"><!-- generado por wizard.js desde CONFIG.PALETAS_PRESET --></div>
-
-            <div class="paleta-editor">
-              <div class="form-group">
-                <label class="form-label" for="color-primario-hex">Color primario</label>
-                <div class="color-input-wrap">
-                  <input type="color" id="color-primario-picker" aria-label="Selector de color primario">
-                  <input type="text" id="color-primario-hex" maxlength="7" placeholder="#RRGGBB">
-                </div>
-              </div>
-
-              <button type="button" class="btn-swap-colores" id="btn-swap-colores" aria-label="Intercambiar colores">⇄</button>
-
-              <div class="form-group">
-                <label class="form-label" for="color-secundario-hex">Color secundario</label>
-                <div class="color-input-wrap">
-                  <input type="color" id="color-secundario-picker" aria-label="Selector de color secundario">
-                  <input type="text" id="color-secundario-hex" maxlength="7" placeholder="#RRGGBB">
-                </div>
-              </div>
-            </div>
-
-            <div class="fuentes-picker">
-              <p class="paleta-picker__label">Fuentes</p>
-              <div class="fuentes-grid">
-                <div class="form-group">
-                  <label class="form-label" for="fuente-titulo">Título</label>
-                  <select class="form-select" id="fuente-titulo"></select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="fuente-texto">Textos</label>
-                  <select class="form-select" id="fuente-texto"></select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <!-- Sección: Información personal -->
-        <details class="accordion-section" data-seccion="personal">
-          <summary>
-            <span class="accordion-section__icono">👤</span>
-            <span class="accordion-section__texto">
-              <div>Información personal</div>
-              <div class="accordion-section__hint">Nombre, foto, cargo y descripción</div>
-            </span>
-            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </summary>
-          <div class="accordion-section__body">
-
-            <div class="form-group">
-              <label class="form-label" for="nombre_completo">Nombre completo *</label>
-              <input class="form-input" type="text" id="nombre_completo" name="nombre_completo" required maxlength="100" placeholder="Ej. María Gómez">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="foto-file">Foto de perfil</label>
-              <input class="form-input" type="file" id="foto-file" accept="image/png, image/jpeg, image/webp">
-              <p class="form-hint">JPG, PNG o WEBP. Se optimiza automáticamente al subirla.</p>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="cargo">Cargo / profesión</label>
-              <input class="form-input" type="text" id="cargo" name="cargo" maxlength="100" placeholder="Ej. Diseñadora UX">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="empresa">Empresa / negocio</label>
-              <input class="form-input" type="text" id="empresa" name="empresa" maxlength="100" placeholder="Ej. Estudio Creativo SAC">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="bio">Breve descripción</label>
-              <textarea class="form-textarea" id="bio" name="bio" maxlength="280" placeholder="Cuéntale al mundo quién eres en pocas palabras"></textarea>
-            </div>
-          </div>
-        </details>
-
-        <!-- Sección: Información de contacto -->
-        <details class="accordion-section" data-seccion="contacto">
-          <summary>
-            <span class="accordion-section__icono">☎️</span>
-            <span class="accordion-section__texto">
-              <div>Información de contacto</div>
-              <div class="accordion-section__hint">Teléfono, WhatsApp y dirección</div>
-            </span>
-            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </summary>
-          <div class="accordion-section__body">
-
-            <div class="form-group">
-              <label class="form-label" for="telefono">Teléfono</label>
-              <input class="form-input" type="tel" id="telefono" name="telefono" placeholder="+51 999 999 999">
-            </div>
-
-            <div class="form-group form-check">
-              <input type="checkbox" id="es_whatsapp" name="es_whatsapp" checked>
-              <label class="form-label" for="es_whatsapp" style="margin:0;">Este número también es mi WhatsApp</label>
-            </div>
-
-            <div class="form-group" id="whatsapp-wrap" style="display:none;">
-              <label class="form-label" for="whatsapp">Número de WhatsApp</label>
-              <input class="form-input" type="tel" id="whatsapp" name="whatsapp" placeholder="+51 999 999 999">
-              <p class="form-hint">Ingresa el número solo si es distinto al de llamadas.</p>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="direccion">Dirección</label>
-              <input class="form-input" type="text" id="direccion" name="direccion" maxlength="150" placeholder="Ciudad, referencia...">
-            </div>
-
-            <div class="form-group form-check">
-              <input type="checkbox" id="mostrar_email" name="mostrar_email">
-              <label class="form-label" for="mostrar_email" style="margin:0;">Mostrar mi email de cuenta en la tarjeta pública</label>
-            </div>
-          </div>
-        </details>
-
-        <!-- Sección: Redes sociales -->
-        <details class="accordion-section" data-seccion="redes">
-          <summary>
-            <span class="accordion-section__icono">🌐</span>
-            <span class="accordion-section__texto">
-              <div>Redes sociales</div>
-              <div class="accordion-section__hint">Añade enlaces a tus redes</div>
-            </span>
-            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </summary>
-          <div class="accordion-section__body">
-            <div id="redes-campos"><!-- generado por wizard.js desde CONFIG.REDES_SOCIALES --></div>
-          </div>
-        </details>
-
-        <!-- Sección: Toques finales -->
-        <details class="accordion-section" data-seccion="extras">
-          <summary>
-            <span class="accordion-section__icono">✨</span>
-            <span class="accordion-section__texto">
-              <div>Toques finales</div>
-              <div class="accordion-section__hint">Video y tu link único</div>
-            </span>
-            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </summary>
-          <div class="accordion-section__body">
-
-            <p class="form-hint">El horario de atención y el módulo de "Agendar una cita" se configuran después, desde tu panel.</p>
-
-            <div class="form-group">
-              <label class="form-label" for="video_url">Video (YouTube/Vimeo, opcional)</label>
-              <input class="form-input" type="url" id="video_url" name="video_url" placeholder="https://youtube.com/watch?v=...">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="slug">Tu link único *</label>
-              <div class="slug-input-wrap">
-                <span id="slug-prefijo">tusitio.com/u/</span>
-                <input class="form-input" type="text" id="slug" name="slug" required minlength="3" maxlength="40" placeholder="tu-nombre">
-              </div>
-              <p class="form-hint" id="slug-estado">Elige un identificador único, sin espacios ni acentos.</p>
-            </div>
-          </div>
-        </details>
-
-        <!-- Tarjeta final fija: crear cuenta (no es desplegable, siempre visible) -->
-        <div class="card" style="margin-top: var(--space-md);">
-          <h2>Crea tu cuenta para generar tu QR</h2>
-          <p class="form-hint">Tus datos ya están listos. Solo falta confirmar tu correo para publicar tu tarjeta y generar tu código QR.</p>
-
-          <div class="form-group">
-            <label class="form-label" for="email">Correo electrónico *</label>
-            <input class="form-input" type="email" id="email" name="email" required placeholder="tu@correo.com">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="password">Contraseña *</label>
-            <input class="form-input" type="password" id="password" name="password" required minlength="8" placeholder="Mínimo 8 caracteres">
-          </div>
-
-          <div id="registro-error" class="form-error" role="alert" style="display:none;"></div>
-          <div id="registro-exito" class="form-success" role="status" style="display:none;"></div>
-
-          <button type="submit" class="btn btn-primary btn-block" id="btn-registrar">Crear cuenta y generar mi QR</button>
+      <div class="lp-paper" aria-hidden="true">
+        <div class="lp-paper__txt">
+          <b>María Rojas</b>
+          <span>Arquitecta · Estudio propio</span>
+          <small>Escanea y mira mis trabajos</small>
+        </div>
+        <div class="lp-paper__qr">
+          <svg class="lp-qr" data-qr="hero" viewBox="0 0 25 25" shape-rendering="crispEdges"></svg>
+          <i class="lp-beam"></i>
+          <i class="lp-ping"></i>
         </div>
       </div>
 
-      <!-- ================= PREVIEW EN VIVO ================= -->
-      <aside class="tarjeta-preview" aria-label="Vista previa de tu tarjeta">
-        <div class="tarjeta-preview__header" id="preview-header">
-          <div class="tarjeta-preview__avatar-wrap">
-            <img class="tarjeta-preview__avatar" id="preview-avatar" alt="">
-            <span class="tarjeta-preview__avatar-placeholder" id="preview-avatar-placeholder" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="40" height="40" fill="none"><circle cx="12" cy="8.5" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 19.5c1.5-3.5 4.5-5 7.5-5s6 1.5 7.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            </span>
-          </div>
-          <h3 class="tarjeta-preview__nombre" id="preview-nombre">Tu nombre aquí</h3>
-          <p class="tarjeta-preview__cargo" id="preview-cargo">Tu cargo / empresa</p>
-          <div class="tarjeta-preview__redes" id="preview-redes"></div>
-          <svg class="tarjeta-preview__ola" viewBox="0 0 500 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0,12 C125,24 375,0 500,12 L500,24 L0,24 Z" style="fill:var(--color-bg)"></path></svg>
-        </div>
-        <div class="tarjeta-preview__body">
-          <p class="tarjeta-preview__bio" id="preview-bio"></p>
-          <div class="tarjeta-preview__contacto" id="preview-contacto"></div>
-        </div>
-      </aside>
+      <div class="lp-phone">
+        <span class="lp-phone__notch" aria-hidden="true"></span>
+        <div class="lp-phone__screen" id="demo-screen"></div>
+      </div>
 
+      <button type="button" class="lp-replay" id="replay">↻ Escanear otra vez</button>
     </div>
-  </form>
+  </div>
+</header>
+
+<!-- ============ CÓMO FUNCIONA ============ -->
+<section class="lp-sec" id="como">
+  <div class="lp-wrap">
+    <h2 class="lp-h2">Listo en tres pasos</h2>
+    <p class="lp-lead">No necesitas saber de diseño ni de páginas web.</p>
+    <ol class="lp-steps">
+      <li><span class="lp-steps__n">1</span><h3>Llena tus datos</h3><p>Nombre, cargo, teléfono y redes. Ves tu tarjeta armarse en vivo mientras escribes.</p></li>
+      <li><span class="lp-steps__n">2</span><h3>Confirma tu correo</h3><p>Creas tu cuenta y tu tarjeta se activa sola con todo lo que ya llenaste.</p></li>
+      <li><span class="lp-steps__n">3</span><h3>Descarga tu QR</h3><p>Queda listo para imprimir, mandar por WhatsApp o pegar en tu local.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ DEMO ============ -->
+<section class="lp-sec lp-sec--ink" id="demo">
+  <div class="lp-wrap lp-demo">
+    <div class="lp-demo__copy">
+      <h2 class="lp-h2">Así se vería tu perfil</h2>
+      <p class="lp-lead">Dos formas de usarlo. Elige la que se parece a lo tuyo.</p>
+      <div class="lp-tabs" role="tablist" aria-label="Tipo de perfil">
+        <button class="lp-tab" role="tab" aria-selected="true"  data-demo="profesional">Profesional</button>
+        <button class="lp-tab" role="tab" aria-selected="false" data-demo="negocio">Negocio o local</button>
+      </div>
+      <h3 id="demo-titulo">—</h3>
+      <p id="demo-texto" class="lp-demo__txt"></p>
+      <ul class="lp-demo__list" id="demo-bullets"></ul>
+    </div>
+    <div class="lp-phone lp-phone--static">
+      <span class="lp-phone__notch" aria-hidden="true"></span>
+      <div class="lp-phone__screen" id="demo-screen-2"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PARA QUIÉN ============ -->
+<section class="lp-sec lp-sec--tight">
+  <div class="lp-wrap">
+    <h2 class="lp-h2">Para cualquiera que se presente</h2>
+    <p class="lp-lead">El portafolio se adapta a lo que tú muestras.</p>
+    <ul class="lp-chips">
+      <li>💼 Profesionales</li>
+      <li>📸 Fotógrafos y creativos</li>
+      <li>🦷 Salud y estética</li>
+      <li>🍽️ Restaurantes</li>
+      <li>🏗️ Obras y servicios</li>
+      <li>🛍️ Tiendas y vendedores</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ FUNCIONES ============ -->
+<section class="lp-sec">
+  <div class="lp-wrap">
+    <h2 class="lp-h2">Todo en un solo QR</h2>
+    <p class="lp-lead">Un panel simple, sin instalar nada.</p>
+
+    <div class="lp-bento">
+      <article class="lp-tile lp-tile--qr">
+        <div>
+          <h3>Tu QR no cambia nunca</h3>
+          <p>Cambias de trabajo, de teléfono o de foto, y el mismo código impreso ya muestra lo nuevo.</p>
+        </div>
+        <svg class="lp-qr lp-qr--tile" data-qr="tile" viewBox="0 0 25 25" shape-rendering="crispEdges" aria-hidden="true"></svg>
+      </article>
+
+      <article class="lp-tile lp-tile--port">
+        <h3>Portafolio con carrusel</h3>
+        <p>Varios trabajos, varias fotos por trabajo, cada una con su detalle.</p>
+        <div class="lp-mini-car" aria-hidden="true"><i></i><i></i><i></i><em><u></u><u></u><u></u></em></div>
+      </article>
+
+      <article class="lp-tile lp-tile--cita">
+        <h3>Agenda de citas</h3>
+        <p>Pones tus días y horas; la gente reserva desde tu perfil.</p>
+        <div class="lp-days" aria-hidden="true"><i>L</i><i>M</i><i class="on">X</i><i>J</i><i>V</i></div>
+      </article>
+
+      <article class="lp-tile lp-tile--color">
+        <h3>Tus colores y fuentes</h3>
+        <p>Que se vea como tu marca.</p>
+        <div class="lp-swatches" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      </article>
+
+      <article class="lp-tile lp-tile--stats">
+        <h3>Estadísticas de escaneo</h3>
+        <p>Cuántos escanearon tu código y cuándo.</p>
+        <div class="lp-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </article>
+
+      <article class="lp-tile lp-tile--print">
+        <h3>Tarjeta para imprimir</h3>
+        <p>PDF en alta calidad, listo para la imprenta.</p>
+        <div class="lp-mini-card" aria-hidden="true">90 × 50 mm</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRECIOS ============ -->
+<section class="lp-sec lp-sec--lilac" id="precios">
+  <div class="lp-wrap">
+    <h2 class="lp-h2">Precios</h2>
+    <p class="lp-lead">Empieza gratis. Pasas a Pro cuando necesites mostrar más.</p>
+
+    <div class="lp-plans">
+      <article class="lp-plan">
+        <h3>Gratis</h3>
+        <p class="lp-plan__price">S/ 0</p>
+        <p class="lp-plan__alt">Para siempre</p>
+        <ul>
+          <li>Tu perfil público y tu QR</li>
+          <li>3 trabajos en el portafolio</li>
+          <li>2 fotos por trabajo</li>
+          <li>Agenda de citas</li>
+          <li>Colores y tipografías</li>
+        </ul>
+        <a class="lp-btn lp-btn--line" href="crear.html">Crear mi tarjeta</a>
+      </article>
+
+      <article class="lp-plan lp-plan--pro">
+        <span class="lp-plan__tag">El que casi todos eligen</span>
+        <h3>Pro</h3>
+        <p class="lp-plan__price">S/ 19.90 <small>/ mes</small></p>
+        <p class="lp-plan__alt">O S/ 189.00 al año: sale S/ 15.75 al mes</p>
+        <ul>
+          <li>Todo lo del plan gratis</li>
+          <li>Hasta 30 trabajos, 8 fotos cada uno</li>
+          <li>Trabajos privados, solo para ti</li>
+          <li>Estadísticas de escaneo</li>
+          <li>PDF de tu tarjeta para imprenta</li>
+        </ul>
+        <a class="lp-btn lp-btn--aji" href="crear.html" data-wa="pro">Quiero Pro por WhatsApp</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="lp-sec">
+  <div class="lp-wrap lp-wrap--narrow">
+    <h2 class="lp-h2">Preguntas frecuentes</h2>
+    <div class="lp-faq">
+      <details><summary>Si imprimo el QR y cambio de trabajo, ¿se pierde?</summary>
+        <p>No. El QR apunta a tu perfil, no a tus datos. Entras a tu panel, cambias cargo, empresa o teléfono, y el mismo código impreso ya muestra lo nuevo. Por eso conviene imprimir por millar una sola vez.</p></details>
+      <details><summary>¿El QR caduca o deja de funcionar?</summary>
+        <p>No caduca. Mientras tu perfil esté activo, el código sigue llevando a él.</p></details>
+      <details><summary>¿Necesito saber de diseño?</summary>
+        <p>No. Llenas un formulario y vas viendo el resultado. Si quieres, cambias colores y tipografía con un clic.</p></details>
+      <details><summary>¿Puedo esconder un trabajo sin borrarlo?</summary>
+        <p>Sí, en el plan Pro. Lo marcas como privado: lo sigues viendo tú en tu panel y desaparece del perfil público.</p></details>
+      <details><summary>¿Me sirve si mi cliente es más tradicional y pide tarjeta de papel?</summary>
+        <p>Para eso está el PDF para imprenta: tu tarjeta física, con tu QR impreso. El papel se lo das como siempre; el QR es el que se mantiene al día.</p></details>
+      <details><summary>¿Y si mañana ya no lo quiero?</summary>
+        <p>Cancelas cuando quieras y tu perfil vuelve al plan gratis. No se borra nada de golpe.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA FINAL ============ -->
+<section class="lp-sec lp-sec--tight">
+  <div class="lp-wrap">
+    <div class="lp-cta">
+      <h2>Tu próximo contacto ya tiene el celular en la mano</h2>
+      <p>Arma tu tarjeta en unos minutos y descarga tu QR hoy mismo.</p>
+      <div class="lp-cta__btns">
+        <a class="lp-btn lp-btn--aji lp-btn--lg" href="crear.html">Crear mi tarjeta gratis</a>
+        <a class="lp-btn lp-btn--glass lp-btn--lg" href="#" data-wa="contacto">Hablar por WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
 </main>
 
-<footer class="container" style="text-align:center; color: var(--gray-600); padding: var(--space-lg) 0; font-size: 0.85rem;">
-  © 2026 QR Personal System · Gratis para siempre
+<!-- ============ FOOTER ============ -->
+<footer class="lp-footer">
+  <div class="lp-wrap lp-footer__row">
+    <a class="lp-brand" href="#top" aria-label="TARJE, inicio">
+      <span class="lp-brand__mark" aria-hidden="true"><i></i><i></i><i></i><b></b></span>
+      <span class="lp-brand__name" data-marca>TARJE</span>
+    </a>
+    <nav class="lp-footer__links" aria-label="Enlaces">
+      <a href="#demo">Ejemplos</a>
+      <a href="#precios">Precios</a>
+      <a href="crear.html">Crear mi tarjeta</a>
+      <a href="pages/login.html">Iniciar sesión</a>
+      <a href="#" data-wa="contacto">Contacto</a>
+    </nav>
+    <p class="lp-footer__legal">Un producto de ZatVox · Lima, Perú · © <span id="anio"></span></p>
+  </div>
 </footer>
 
-<script type="module" src="assets/js/wizard.js"></script>
+<script type="module" src="assets/js/landing.js"></script>
 </body>
 </html>

@@ -4,6 +4,16 @@
 import { getSupabaseClient } from './supabase-client.js';
 
 /**
+ * Carpeta raíz del sitio (con barra final), esté la página en la raíz
+ * (index.html, crear.html) o dentro de /pages/. No depende de que la URL
+ * termine en "/" o en un nombre de archivo.
+ */
+function rutaBase() {
+  const dir = window.location.pathname.replace(/[^/]*$/, '');
+  return window.location.origin + dir.replace(/pages\/$/, '');
+}
+
+/**
  * Registra un usuario nuevo. Los datos del wizard viajan en
  * user_metadata; el trigger handle_new_user() los usará al
  * confirmarse el email (ver assets/sql/functions.sql, ADR-004).
@@ -18,7 +28,7 @@ export async function registrarUsuario({ email, password, datosWizard, slugSuger
         ...datosWizard,
         slug_sugerido: slugSugerido || '',
       },
-      emailRedirectTo: window.location.origin + window.location.pathname.replace(/pages\/.*$/, '') + 'pages/login.html?confirmado=1',
+      emailRedirectTo: rutaBase() + 'pages/login.html?confirmado=1',
     },
   });
   if (error) throw error;
@@ -58,9 +68,9 @@ export async function reenviarConfirmacion(email) {
  */
 export async function solicitarResetPassword(email) {
   const supabase = await getSupabaseClient();
-  const rutaBase = window.location.origin + window.location.pathname.replace(/pages\/.*$/, '');
+  const base = rutaBase();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${rutaBase}pages/restablecer-password.html`,
+    redirectTo: `${base}pages/restablecer-password.html`,
   });
   if (error) throw error;
 }

@@ -4,7 +4,7 @@ Sistema web simplificado (tipo qr-code.io) para crear una página personal/tarje
 
 ## ¿Qué hace?
 
-1. El visitante llena un formulario de varios pasos (`index.html`) viendo el resultado en vivo.
+1. El visitante llena un formulario de varios pasos (`crear.html`) viendo el resultado en vivo.
 2. Al terminar, crea una cuenta (email/contraseña) para poder generar su QR.
 3. Confirma su correo → su tarjeta se activa automáticamente con los datos llenados.
 4. Entra a su panel (`pages/dashboard.html`), completa lo que falte (incluida galería de fotos y avatar), y descarga su QR.
@@ -20,7 +20,8 @@ Sistema web simplificado (tipo qr-code.io) para crear una página personal/tarje
 
 ```
 Personal-vcard-web/
-├── index.html              # Wizard público con preview en vivo
+├── index.html              # Landing (página de venta, demo y precios)
+├── crear.html              # Wizard público con preview en vivo
 ├── 404.html                 # Redirección de /u/slug -> pages/perfil.html
 ├── pages/
 │   ├── login.html

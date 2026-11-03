@@ -25,18 +25,37 @@ export const CONFIG = {
   TOAST_MENSAJE: 'Regístrate para que puedas generar tu QR',
   DRAFT_STORAGE_KEY: 'vcard_wizard_draft_v2',
 
-  // Galería y avatar — límites pensados para maximizar la capacidad
+  // Avatar — límites pensados para maximizar la capacidad
   // del free tier de Supabase Storage (1GB) con muchos usuarios.
   // Ver docs/ARQUITECTURA-VCARD.md 3.4 y ADR-005: toda imagen se
   // redimensiona/comprime en el navegador ANTES de subirse.
-  GALERIA_MAX_FOTOS: 6,
-  GALERIA_MAX_MB: 2,          // límite del archivo ORIGINAL antes de comprimir
   AVATAR_MAX_MB: 3,           // límite del archivo ORIGINAL antes de comprimir
-  GALERIA_RESIZE_MAX_PX: 1080,
-  GALERIA_JPEG_CALIDAD: 0.72, // ~150-350KB típico por foto ya comprimida
   AVATAR_RESIZE_MAX_PX: 512,
   AVATAR_JPEG_CALIDAD: 0.82,  // ~40-120KB típico
   POST_COMPRESION_MAX_KB: 700, // tope de seguridad tras comprimir (casos raros)
+
+  // Portafolio (reemplaza a la galería). Imágenes de trabajos: 1280px
+  // lado largo, JPEG ~0.72 → ~120-250KB. El original puede pesar hasta
+  // 10MB porque se comprime en el navegador antes de subir (ADR-005).
+  PORTAFOLIO_MAX_MB: 10,
+  PORTAFOLIO_RESIZE_MAX_PX: 1280,
+  PORTAFOLIO_JPEG_CALIDAD: 0.72,
+
+  // Planes. OJO: los topes REALES los fuerza la base de datos
+  // (007_portafolio_admin.sql). Esto solo sirve para pintar contadores
+  // y mensajes; si se cambia aquí, cambiar también el SQL.
+  PLANES: {
+    gratis: { etiqueta: 'Gratis', maxItems: 3,  maxFotosPorItem: 2, privados: false },
+    pro:    { etiqueta: 'Pro',    maxItems: 30, maxFotosPorItem: 8, privados: true  },
+  },
+
+  // Precios sugeridos en S/ (el panel admin los autocompleta al registrar un pago).
+  // Regla de precio: nunca números redondos.
+  PRECIOS: { mensual: 19.90, anual: 189.00 },
+
+  // Número de WhatsApp (solo dígitos, con código de país) al que llega
+  // "Quiero Pro". Es el mismo número del admin (cobranza y atención por WhatsApp). Vacío = el botón no se muestra.
+  WHATSAPP_VENTAS: '51970741197',
 
   // Avatar elegido ANTES de crear la cuenta (wizard): se guarda como
   // miniatura base64 dentro de user_metadata (no hay Storage disponible

@@ -323,55 +323,6 @@ a.tarjeta-preview__contacto-valor:hover { text-decoration: underline; }
 }
 .btn-perfil-accion:hover { background: var(--gray-100); }
 
-/* Galería pública como mini-portafolio: cada foto es una tarjeta con
-   imagen + título + descripción + enlace externo opcional ("Ver más"). */
-.perfil-galeria {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--space-sm);
-}
-
-.perfil-galeria__item {
-  text-align: left;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--gray-50);
-  border: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-}
-
-.perfil-galeria__item img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  display: block;
-  cursor: zoom-in;
-}
-
-.perfil-galeria__item-texto { padding: var(--space-xs) var(--space-sm) var(--space-sm); }
-
-.perfil-galeria__item-titulo {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--gray-900);
-  margin: 0 0 2px;
-}
-
-.perfil-galeria__item-desc {
-  font-size: 0.8rem;
-  color: var(--gray-600);
-  margin: 0 0 var(--space-xs);
-}
-
-.perfil-galeria__item-link {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-primary);
-  text-decoration: none;
-}
-.perfil-galeria__item-link:hover { text-decoration: underline; }
-
 /* Lightbox: al hacer click en una foto de la galería, se agranda en el
    centro de la pantalla; click fuera de la imagen (en el fondo oscuro)
    la vuelve a encoger a su lugar. Se anima con opacity + scale. */
