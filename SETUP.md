@@ -18,7 +18,7 @@ En el panel de Supabase ve a **SQL Editor** y ejecuta, **en este orden**:
 
 > Si ya habías corrido `schema.sql` antes de la versión con selector de tema de color, corre además `assets/sql/migrations/001_add_tema_perfil.sql` para agregar la columna `tema` sin perder tus datos.
 
-> **Migraciones 001 a 007.** Después de los tres archivos de arriba, corre en orden las de `assets/sql/migrations/` que aún no hayas ejecutado. La **007_portafolio_admin.sql** agrega el portafolio (ítems con varias fotos), los planes Gratis/Pro, los pagos y el panel admin, y migra la galería antigua sin perder nada. Es idempotente.
+> **Migraciones 001 a 008.** Después de los tres archivos de arriba, corre en orden las de `assets/sql/migrations/` que aún no hayas ejecutado. La **007_portafolio_admin.sql** agrega el portafolio (ítems con varias fotos), los planes Gratis/Pro, los pagos y el panel admin, y migra la galería antigua sin perder nada. Es idempotente. La **008_estadisticas_tarjeta.sql** agrega las estadísticas de visitas/escaneos del QR y el diseño de la tarjeta imprimible (`profiles.tarjeta_config`); también es idempotente.
 >
 > **Tu usuario admin** (una sola vez, en el SQL Editor, con tu correo real):
 > ```sql

@@ -4,6 +4,7 @@
 import { CONFIG } from './config.js';
 import { obtenerPerfilPublico, obtenerHorariosOcupados, crearCita } from './supabase-data.js';
 import { renderPortafolio } from './perfil-portafolio.js';
+import { registrarVisita } from './estadisticas.js';
 import { descargarVcf } from './vcard.js';
 import {
   escapeHtml, soloDigitos, esHexValido, colorTextoLegible, mezclarConBlanco,
@@ -163,6 +164,7 @@ async function init() {
       return;
     }
     await render(perfil);
+    registrarVisita(slug); // no bloquea ni rompe la página
   } catch (err) {
     console.error(err);
     document.getElementById('estado-carga').style.display = 'none';

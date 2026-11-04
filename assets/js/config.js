@@ -57,6 +57,13 @@ export const CONFIG = {
   // "Quiero Pro". Es el mismo número del admin (cobranza y atención por WhatsApp). Vacío = el botón no se muestra.
   WHATSAPP_VENTAS: '51970741197',
 
+  // Estadísticas de visitas/escaneos (ver 008_estadisticas_tarjeta.sql).
+  // guardarDetalle: false = DESHABILITADO. Con false solo se suman
+  // contadores por día (sin IP ni datos personales). En true también se
+  // guardaría dispositivo, idioma y sitio de origen (nunca la IP: el
+  // navegador no la conoce; guardarla exigiría una Edge Function).
+  ESTADISTICAS: { guardarDetalle: false, dias: 30 },
+
   // Avatar elegido ANTES de crear la cuenta (wizard): se guarda como
   // miniatura base64 dentro de user_metadata (no hay Storage disponible
   // todavía porque el usuario no existe como auth.users confirmado).

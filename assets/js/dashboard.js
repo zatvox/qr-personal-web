@@ -8,6 +8,9 @@ import {
   obtenerCitas, eliminarCita,
 } from './supabase-data.js';
 import { iniciarEditorPortafolio, actualizarPerfilEnEditor } from './portafolio-editor.js';
+import { iniciarEditorTarjeta, actualizarPerfilEnTarjeta } from './tarjeta-editor.js';
+import { obtenerEstadisticas, pintarEstadisticas } from './estadisticas.js';
+import { linkQuieroPro } from './planes.js';
 import { esAdmin } from './admin-data.js';
 import { renderizarQR, descargarQR } from './qr.js';
 import { escapeHtml, comprimirImagen, base64ADataBlob, esHexValido, mezclarConBlanco, iconoRedSocial, iconoContacto, cargarGoogleFont, colorTextoLegible, debounce, formatearHorarioAtencion, formatearHora12h } from './utils.js';
@@ -239,7 +242,7 @@ function llenarFormulario(perfil) {
   document.getElementById('slug-prefijo').textContent = CONFIG.SITE_BASE_URL.replace(/^https?:\/\//, '') + '/u/';
   document.getElementById('qr-link').textContent = linkPerfil;
 
-  renderizarQR('qr-contenedor', linkPerfil);
+  renderizarQR('qr-contenedor', `${linkPerfil}?s=qr`); // ?s=qr: así se cuentan los escaneos
 }
 
 function actualizarPreview(perfil) {
@@ -413,6 +416,16 @@ async function importarAvatarPendienteSiExiste() {
 // ------------------------------------------------------------
 // Init
 // ------------------------------------------------------------
+async function cargarEstadisticas() {
+  const el = document.getElementById('stats-contenedor');
+  try {
+    pintarEstadisticas(el, await obtenerEstadisticas(), { linkPro: linkQuieroPro(perfilActual) });
+  } catch (err) {
+    console.error(err);
+    el.innerHTML = '<p class="form-hint">Las estadísticas estarán disponibles al activar la migración 008.</p>';
+  }
+}
+
 async function init() {
   sesion = await protegerPagina('login.html');
   if (!sesion) return;
@@ -429,6 +442,8 @@ async function init() {
 
     llenarFormulario(perfilActual);
     iniciarEditorPortafolio({ userId: sesion.user.id, perfil: perfilActual });
+    iniciarEditorTarjeta({ userId: sesion.user.id, perfil: perfilActual });
+    cargarEstadisticas();
     cargarCitas();
     esAdmin().then(ok => { if (ok) document.getElementById('link-admin').style.display = ''; });
     document.getElementById('estado-carga').style.display = 'none';
@@ -476,6 +491,7 @@ document.getElementById('form-dashboard').addEventListener('submit', async (e) =
     perfilActual = await actualizarPerfil(sesion.user.id, cambios);
     llenarFormulario(perfilActual);
     actualizarPerfilEnEditor(perfilActual);
+    actualizarPerfilEnTarjeta(perfilActual);
     exitoEl.textContent = 'Cambios guardados correctamente.';
     exitoEl.style.display = 'block';
   } catch (err) {

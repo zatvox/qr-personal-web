@@ -7,6 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="../assets/images/logo.svg">
 <link rel="stylesheet" href="../assets/css/styles.css">
 <link rel="stylesheet" href="../assets/css/portafolio.css">
+<link rel="stylesheet" href="../assets/css/tarjeta.css">
 </head>
 <body>
 
@@ -304,6 +305,19 @@
             <button type="submit" class="btn btn-primary btn-block">Guardar cambios</button>
           </div>
         </form>
+
+        <!-- Tarjeta imprimible -->
+        <details class="accordion-section" data-seccion="tarjeta" style="margin-top: var(--space-sm);">
+          <summary>
+            <span class="accordion-section__icono">🖨️</span>
+            <span class="accordion-section__texto">
+              <div>Tarjeta imprimible</div>
+              <div class="accordion-section__hint">10 diseños · PDF para imprenta (90×50 mm)</div>
+            </span>
+            <svg class="accordion-section__chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7l5 6 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="accordion-section__body" id="tarjeta-editor"></div>
+        </details>
       </div>
 
       <!-- ================= PREVIEW + QR ================= -->
@@ -332,6 +346,11 @@
           <div id="qr-contenedor" style="display:flex; justify-content:center; margin: var(--space-md) 0;"></div>
           <p class="form-hint" id="qr-link"></p>
           <button class="btn btn-secondary btn-block" id="btn-descargar-qr" style="margin-top: var(--space-sm);">Descargar QR</button>
+        </div>
+
+        <div class="card" style="margin-top: var(--space-md);">
+          <h2>Visitas <span class="form-hint" style="font-weight:400;">· últimos 30 días</span></h2>
+          <div id="stats-contenedor"><p class="form-hint">Cargando…</p></div>
         </div>
       </aside>
     </div>

@@ -79,3 +79,18 @@ export function descargarQR(contenedorId, nombreArchivo = 'mi-qr.png') {
   a.remove();
   return true;
 }
+
+/**
+ * Devuelve la matriz de módulos del QR (array de arrays de booleanos)
+ * para dibujarlo como vector/canvas a cualquier resolución (PDF de la
+ * tarjeta). Reutiliza la misma librería que renderizarQR.
+ */
+export async function matrizQR(texto, nivel = 'M') {
+  await asegurarLibreria();
+  const tmp = document.createElement('div');
+  // eslint-disable-next-line no-undef
+  const qr = new QRCode(tmp, { text: texto, width: 64, height: 64, correctLevel: QRCode.CorrectLevel[nivel] });
+  const o = qr._oQRCode;
+  const n = o.getModuleCount();
+  return Array.from({ length: n }, (_, r) => Array.from({ length: n }, (_, c) => o.isDark(r, c)));
+}

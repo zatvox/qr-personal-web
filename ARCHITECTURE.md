@@ -55,3 +55,10 @@ Ver índice completo en `docs/ARQUITECTURA-VCARD.md` sección 5. Resumen: ADR-00
 - Cambios de esquema → nueva migración numerada en `assets/sql/migrations/` (crear carpeta al primer cambio post-lanzamiento) + ADR si es una decisión nueva.
 - Parámetros de negocio (textos, límites, redes soportadas) → `assets/js/config.js`, nunca hardcodeados en las páginas.
 - No eliminar archivos ni políticas sin confirmación previa del dueño del proyecto.
+
+
+## Estadísticas y tarjeta imprimible (migración 008)
+
+- **Visitas:** el perfil público llama `registrar_visita(slug, origen)` (RPC `security definer`, accesible a anónimos). El QR impreso apunta a `/u/slug?s=qr`; sin ese parámetro la visita cuenta como "link". Solo se suman contadores por día (`visitas_diarias`); no se guarda IP. `CONFIG.ESTADISTICAS.guardarDetalle` (hoy `false`) activaría `visitas_detalle` (dispositivo, idioma, referrer; nunca IP). El dueño no se cuenta a sí mismo.
+- **Lectura:** `estadisticas_perfil(dias)` devuelve totales a todos y la serie diaria solo a plan Pro.
+- **Tarjeta:** `tarjeta-render.js` dibuja frente/dorso en canvas con medidas en mm (10 diseños). `tarjeta-editor.js` es la UI del dashboard y arma el PDF con jsPDF: 2 páginas de 96×56 mm (90×50 + 3 mm de sangrado por lado) a 600 dpi. La configuración se autoguarda en `profiles.tarjeta_config`. Descargar el PDF es solo para Pro (control de interfaz; el PDF se genera en el navegador).
